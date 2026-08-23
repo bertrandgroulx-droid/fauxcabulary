@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lexicon Artist</title>
+<meta name="description" content="Ten obscure words. Half of them are lying. Can you tell a real word from a well-dressed fake?" />
+<meta name="color-scheme" content="dark" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#128218;</text></svg>" />
+<style>
+  :root {
+    --bg-1: #14101d;
+    --bg-2: #1d1830;
+    --ink: #f6f1e7;
+    --muted: #a49bb5;
+    --card: rgba(255,255,255,0.05);
+    --border: rgba(255,255,255,0.13);
+    --gold: #e5b567;
+    --real: #5fd39a;
+    --fake: #f2777a;
+    --radius: 16px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    background: radial-gradient(120% 90% at 50% 0%, var(--bg-2), var(--bg-1) 70%) fixed;
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 48px;
+    line-height: 1.5;
+  }
+  .wrap { width: 100%; max-width: 620px; }
+
+  header { text-align: center; margin-bottom: 22px; }
+  h1 {
+    font-size: clamp(1.9rem, 7vw, 2.7rem);
+    margin: 0;
+    letter-spacing: 0.01em;
+  }
+  h1 .con { color: var(--gold); font-style: italic; }
+  .tagline { color: var(--muted); font-size: 0.95rem; margin-top: 6px; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    backdrop-filter: blur(6px);
+  }
+
+  /* --- buttons --- */
+  button {
+    font-family: inherit;
+    font-size: 1rem;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.07);
+    color: var(--ink);
+    padding: 14px 20px;
+    cursor: pointer;
+    transition: transform .08s ease, background .15s ease, border-color .15s ease;
+  }
+  button:hover { background: rgba(255,255,255,0.13); }
+  button:active { transform: translateY(1px); }
+  button:disabled { opacity: .5; cursor: default; }
+  .primary {
+    background: var(--gold); color: #221a0c; border-color: var(--gold);
+    font-weight: 700; font-size: 1.05rem; width: 100%; padding: 15px;
+  }
+  .primary:hover { background: #f0c67d; }
+
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 22px; }
+  .choices button { font-size: 1.1rem; font-weight: 700; letter-spacing: .04em; padding: 18px 10px; }
+  .choices .real:hover { border-color: var(--real); color: var(--real); }
+  .choices .fake:hover { border-color: var(--fake); color: var(--fake); }
+  .hint { text-align: center; color: var(--muted); font-size: .8rem; margin-top: 12px; }
+  .hint kbd {
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    border: 1px solid var(--border); border-radius: 5px;
+    padding: 1px 5px; font-size: .78rem;
+  }
+
+  /* --- game --- */
+  .status { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: .9rem; color: var(--muted); }
+  .pips { display: flex; gap: 5px; }
+  .pip { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,0.16); }
+  .pip.hit { background: var(--real); }
+  .pip.miss { background: var(--fake); }
+  .pip.now { box-shadow: 0 0 0 3px rgba(229,181,103,.28); background: var(--gold); }
+
+  .word {
+    font-size: clamp(1.9rem, 8vw, 2.9rem);
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: -0.01em;
+    word-break: break-word;
+    margin: 4px 0 2px;
+  }
+  .pos { text-align: center; color: var(--gold); font-style: italic; font-size: .95rem; margin-bottom: 16px; }
+  .def { text-align: center; font-size: 1.15rem; color: #ece5f5; }
+
+  .verdict { margin-top: 20px; border-top: 1px solid var(--border); padding-top: 18px; }
+  .verdict h3 { margin: 0 0 6px; font-size: 1.15rem; }
+  .verdict.right h3 { color: var(--real); }
+  .verdict.wrong h3 { color: var(--fake); }
+  .verdict p { margin: 0 0 16px; color: var(--muted); font-size: .95rem; }
+  .verdict em { color: var(--ink); font-style: italic; }
+
+  /* --- results --- */
+  .score { text-align: center; font-size: clamp(3rem, 16vw, 4.6rem); font-weight: 700; line-height: 1; }
+  .score span { color: var(--muted); font-size: .4em; }
+  .rank { text-align: center; color: var(--gold); font-size: 1.2rem; font-style: italic; margin: 8px 0 4px; }
+  .blurb { text-align: center; color: var(--muted); font-size: .92rem; margin-bottom: 18px; }
+  ul.recap { list-style: none; padding: 0; margin: 0 0 20px; border-top: 1px solid var(--border); }
+  ul.recap li { display: flex; gap: 10px; align-items: baseline; padding: 9px 2px; border-bottom: 1px solid var(--border); font-size: .95rem; }
+  ul.recap .mark { flex: none; width: 1.2em; }
+  ul.recap .w { font-weight: 700; }
+  ul.recap .t { color: var(--muted); font-size: .85rem; margin-left: auto; flex: none; padding-left: 10px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .best { text-align: center; color: var(--muted); font-size: .85rem; margin-top: 16px; }
+
+  .rules { color: var(--muted); font-size: .98rem; }
+  .rules li { margin-bottom: 8px; }
+  footer { color: var(--muted); font-size: .8rem; text-align: center; margin-top: 22px; }
+  footer a { color: var(--muted); }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Lexicon <span class="con">Artist</span></h1>
+    <div class="tagline">Ten words. Some are real. Some are conning you.</div>
+  </header>
+
+  <!-- ===== START ===== -->
+  <section id="start" class="card">
+    <ul class="rules">
+      <li>You get ten obscure words, each with a straight-faced definition.</li>
+      <li>Five are genuine English. Five were invented for this game.</li>
+      <li>Call each one <strong>REAL</strong> or <strong>FAKE</strong>. Score out of 10.</li>
+    </ul>
+    <button id="btn-start" class="primary">Deal me ten</button>
+    <div id="best-line" class="best"></div>
+  </section>
+
+  <!-- ===== GAME ===== -->
+  <section id="game" class="hidden">
+    <div class="status">
+      <div id="counter">Word 1 of 10</div>
+      <div class="pips" id="pips"></div>
+    </div>
+
+    <div class="card">
+      <div class="word" id="word"></div>
+      <div class="pos" id="pos"></div>
+      <div class="def" id="def"></div>
+
+      <div class="choices" id="choices">
+        <button class="real" id="btn-real">REAL</button>
+        <button class="fake" id="btn-fake">FAKE</button>
+      </div>
+      <div class="hint" id="hint"><kbd>&larr;</kbd> real &nbsp;&middot;&nbsp; <kbd>&rarr;</kbd> fake</div>
+
+      <div class="verdict hidden" id="verdict">
+        <h3 id="verdict-title"></h3>
+        <p id="verdict-note"></p>
+        <button class="primary" id="btn-next">Next word</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== RESULTS ===== -->
+  <section id="results" class="hidden">
+    <div class="card">
+      <div class="score"><span id="final"></span><span>/10</span></div>
+      <div class="rank" id="rank"></div>
+      <div class="blurb" id="blurb"></div>
+      <ul class="recap" id="recap"></ul>
+      <div class="row">
+        <button id="btn-again" class="primary">Play again</button>
+        <button id="btn-share">Copy result</button>
+      </div>
+      <div id="best-line-2" class="best"></div>
+    </div>
+  </section>
+
+  <footer>Built for people who suspect the dictionary is bluffing.</footer>
+</div>
+
+<script src="words.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var ROUND_LEN = 10;          // words per game
+  var REAL_PER_ROUND = 5;      // how many of them are genuine
+  var STORE_BEST = "lexicon-artist.best";
+  var STORE_SEEN = "lexicon-artist.seen";
+
+  var el = function (id) { return document.getElementById(id); };
+  var deck = [];      // the ten words for this game
+  var index = 0;      // which one we're on
+  var score = 0;
+  var answered = false;
+  var log = [];       // { word, real, guess, correct }
+
+  /* ---------- storage (never let a blocked localStorage break the game) ---------- */
+  function read(key, fallback) {
+    try {
+      var v = localStorage.getItem(key);
+      return v === null ? fallback : JSON.parse(v);
+    } catch (e) { return fallback; }
+  }
+  function write(key, value) {
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* ignore */ }
+  }
+
+  /* ---------- deck building ---------- */
+  function shuffle(list) {
+    var a = list.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  // Prefer words the player hasn't seen recently; reset that memory when a pool runs dry.
+  function draw(pool, count, seen) {
+    var fresh = pool.filter(function (item) { return seen.indexOf(item.w) === -1; });
+    if (fresh.length < count) {
+      // Pool exhausted — forget this pool's history and start over.
+      pool.forEach(function (item) {
+        var at = seen.indexOf(item.w);
+        if (at !== -1) seen.splice(at, 1);
+      });
+      fresh = pool.slice();
+    }
+    return shuffle(fresh).slice(0, count);
+  }
+
+  function buildDeck() {
+    var seen = read(STORE_SEEN, []);
+    var reals = draw(REAL_WORDS, REAL_PER_ROUND, seen).map(function (x) { return tag(x, true); });
+    var fakes = draw(FAKE_WORDS, ROUND_LEN - REAL_PER_ROUND, seen).map(function (x) { return tag(x, false); });
+    var picked = shuffle(reals.concat(fakes));
+    write(STORE_SEEN, seen.concat(picked.map(function (x) { return x.w; })));
+    return picked;
+  }
+
+  function tag(entry, isReal) {
+    return { w: entry.w, pos: entry.pos, def: entry.def, note: entry.note, real: isReal };
+  }
+
+  /* ---------- screens ---------- */
+  function show(name) {
+    ["start", "game", "results"].forEach(function (id) {
+      el(id).classList.toggle("hidden", id !== name);
+    });
+  }
+
+  function renderBest() {
+    var best = read(STORE_BEST, null);
+    var text = best === null ? "" : "Personal best: " + best + "/10";
+    el("best-line").textContent = text;
+    el("best-line-2").textContent = text;
+  }
+
+  function renderPips() {
+    var html = "";
+    for (var i = 0; i < ROUND_LEN; i++) {
+      var cls = "pip";
+      if (i < log.length) cls += log[i].correct ? " hit" : " miss";
+      else if (i === index) cls += " now";
+      html += '<div class="' + cls + '"></div>';
+    }
+    el("pips").innerHTML = html;
+  }
+
+  function renderWord() {
+    var card = deck[index];
+    answered = false;
+    el("counter").textContent = "Word " + (index + 1) + " of " + ROUND_LEN;
+    el("word").textContent = card.w;
+    el("pos").textContent = card.pos;
+    el("def").textContent = card.def;
+    el("choices").classList.remove("hidden");
+    el("hint").classList.remove("hidden");
+    el("verdict").classList.add("hidden");
+    el("btn-real").disabled = false;
+    el("btn-fake").disabled = false;
+    renderPips();
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- answering ---------- */
+  function answer(saidReal) {
+    if (answered) return;
+    answered = true;
+
+    var card = deck[index];
+    var correct = (saidReal === card.real);
+    if (correct) score++;
+    log.push({ w: card.w, real: card.real, guess: saidReal, correct: correct });
+
+    var verdict = el("verdict");
+    verdict.className = "verdict " + (correct ? "right" : "wrong");
+    el("verdict-title").textContent =
+      (correct ? "Correct — " : "Nope — ") + card.w + " is " + (card.real ? "a real word." : "a fake.");
+    el("verdict-note").innerHTML = card.note;
+    el("btn-next").textContent = (index === ROUND_LEN - 1) ? "See your score" : "Next word";
+
+    el("btn-real").disabled = true;
+    el("btn-fake").disabled = true;
+    el("choices").classList.add("hidden");
+    el("hint").classList.add("hidden");
+    verdict.classList.remove("hidden");
+    renderPips();
+    el("btn-next").focus();
+  }
+
+  function next() {
+    index++;
+    if (index >= ROUND_LEN) finish();
+    else renderWord();
+  }
+
+  /* ---------- results ---------- */
+  var RANKS = [
+    { min: 10, title: "Lexicographer",     blurb: "A perfect ten. The dictionary works for you now." },
+    { min: 9,  title: "Philologist",       blurb: "One slip in ten. Frankly suspicious." },
+    { min: 7,  title: "Word Detective",    blurb: "You can smell a fake at twenty paces." },
+    { min: 5,  title: "Educated Guesser",  blurb: "Better than a coin, which is more than most manage." },
+    { min: 3,  title: "Cheerfully Conned", blurb: "The made-up words got you. They were designed to." },
+    { min: 0,  title: "Mark",              blurb: "Every con artist needs one. Go again — you'll learn the tells." }
+  ];
+
+  function finish() {
+    var best = read(STORE_BEST, 0);
+    if (score > best) write(STORE_BEST, score);
+
+    var rank = RANKS.filter(function (r) { return score >= r.min; })[0];
+    el("final").textContent = score;
+    el("rank").textContent = rank.title;
+    el("blurb").textContent = rank.blurb;
+
+    el("recap").innerHTML = log.map(function (r) {
+      return '<li>' +
+        '<span class="mark">' + (r.correct ? "&#9989;" : "&#10060;") + '</span>' +
+        '<span class="w">' + r.w + '</span>' +
+        '<span class="t">' + (r.real ? "real" : "fake") + '</span>' +
+      '</li>';
+    }).join("");
+
+    renderBest();
+    show("results");
+    window.scrollTo(0, 0);
+  }
+
+  function shareText() {
+    var grid = log.map(function (r) { return r.correct ? "✅" : "❌"; }).join("");
+    return "Lexicon Artist " + score + "/10\n" + grid + "\nCan you spot the fake words?";
+  }
+
+  function copyResult() {
+    var text = shareText();
+    var done = function () {
+      el("btn-share").textContent = "Copied!";
+      setTimeout(function () { el("btn-share").textContent = "Copy result"; }, 1600);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { window.prompt("Copy your result:", text); });
+    } else {
+      window.prompt("Copy your result:", text);
+    }
+  }
+
+  /* ---------- start / wiring ---------- */
+  function startGame() {
+    deck = buildDeck();
+    index = 0;
+    score = 0;
+    log = [];
+    show("game");
+    renderWord();
+  }
+
+  el("btn-start").addEventListener("click", startGame);
+  el("btn-again").addEventListener("click", startGame);
+  el("btn-share").addEventListener("click", copyResult);
+  el("btn-real").addEventListener("click", function () { answer(true); });
+  el("btn-fake").addEventListener("click", function () { answer(false); });
+  el("btn-next").addEventListener("click", next);
+
+  document.addEventListener("keydown", function (e) {
+    var playing = !el("game").classList.contains("hidden");
+    if (!playing) {
+      if (e.key === "Enter" && !el("start").classList.contains("hidden")) startGame();
+      return;
+    }
+    if (!answered) {
+      if (e.key === "ArrowLeft"  || e.key === "r" || e.key === "R") { e.preventDefault(); answer(true); }
+      if (e.key === "ArrowRight" || e.key === "f" || e.key === "F") { e.preventDefault(); answer(false); }
+    } else if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      next();
+    }
+  });
+
+  renderBest();
+})();
+</script>
+</body>
+</html>
