@@ -3,193 +3,322 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lexicon Artist</title>
+<title>Fauxcabulary</title>
 <meta name="description" content="Ten obscure words. Half of them are lying. Can you tell a real word from a well-dressed fake?" />
 <meta name="color-scheme" content="dark" />
+<meta name="theme-color" content="#14101d" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#128218;</text></svg>" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;1,6..96,400&family=IBM+Plex+Mono:wght@400;500&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap" />
 <style>
+  /* Fauxcabulary — a deliberately single-theme design: a lamplit reading room.
+     Every colour is painted explicitly so the page holds on any host ground. */
   :root {
-    --bg-1: #14101d;
-    --bg-2: #1d1830;
+    --ground: #14101d;
+    --ground-lift: #1b1628;
+    --slip: #221b30;
     --ink: #f6f1e7;
+    --ink-soft: #ded5e6;
     --muted: #a49bb5;
-    --card: rgba(255,255,255,0.05);
-    --border: rgba(255,255,255,0.13);
+    --rule: rgba(246, 241, 231, 0.14);
     --gold: #e5b567;
-    --real: #5fd39a;
-    --fake: #f2777a;
-    --radius: 16px;
+    --gold-dim: #a8823f;
+    --genuine: #5fd39a;
+    --fabricated: #f2777a;
+
+    --display: "Bodoni Moda", "Didot", "Playfair Display", Georgia, serif;
+    --body: "Spectral", Georgia, "Times New Roman", serif;
+    --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+
+    --step-0: 1rem;
+    --step-1: 1.15rem;
+    --step-2: clamp(1.6rem, 5vw, 2.1rem);
+    --step-3: clamp(2.1rem, 9vw, 3.2rem);
+    --radius: 4px;
   }
+
   * { box-sizing: border-box; }
-  html, body { margin: 0; min-height: 100%; }
+  html { -webkit-text-size-adjust: 100%; }
   body {
-    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-    background: radial-gradient(120% 90% at 50% 0%, var(--bg-2), var(--bg-1) 70%) fixed;
+    margin: 0;
+    min-height: 100vh;
+    background: var(--ground);
+    background-image: radial-gradient(120% 80% at 50% -10%, var(--ground-lift), var(--ground) 65%);
+    background-attachment: fixed;
     color: var(--ink);
+    font-family: var(--body);
+    font-size: var(--step-0);
+    line-height: 1.55;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 24px 16px 48px;
-    line-height: 1.5;
+    padding: 28px 18px 56px;
   }
-  .wrap { width: 100%; max-width: 620px; }
+  .wrap { width: 100%; max-width: 34rem; }
 
-  header { text-align: center; margin-bottom: 22px; }
-  h1 {
-    font-size: clamp(1.9rem, 7vw, 2.7rem);
+  /* ---------- masthead ---------- */
+  header { text-align: center; margin-bottom: 26px; }
+  .wordmark {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: var(--step-2);
+    letter-spacing: -0.015em;
     margin: 0;
-    letter-spacing: 0.01em;
+    line-height: 1.1;
   }
-  h1 .con { color: var(--gold); font-style: italic; }
-  .tagline { color: var(--muted); font-size: 0.95rem; margin-top: 6px; }
+  .wordmark .faux { color: var(--gold); font-style: italic; }
+  .tagline {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--muted);
+    margin-top: 10px;
+  }
 
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
+  /* ---------- the slip ---------- */
+  .slip {
+    background: var(--slip);
+    border: 1px solid var(--rule);
+    border-top: 2px solid var(--gold-dim);
     border-radius: var(--radius);
-    padding: 24px;
-    backdrop-filter: blur(6px);
+    padding: 20px 22px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .slip-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+  }
+  .pips { display: flex; gap: 5px; }
+  .pip {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(246, 241, 231, 0.16);
+    transition: background .2s ease, box-shadow .2s ease;
+  }
+  .pip.hit { background: var(--genuine); }
+  .pip.miss { background: var(--fabricated); }
+  .pip.now { background: var(--gold); box-shadow: 0 0 0 3px rgba(229, 181, 103, 0.22); }
+
+  .entry { text-align: center; display: flex; flex-direction: column; gap: 8px; }
+  .headword {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: var(--step-3);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    overflow-wrap: break-word;
+    margin: 0;
+  }
+  .pos {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+  }
+  .def {
+    font-size: var(--step-1);
+    color: var(--ink-soft);
+    text-wrap: pretty;
+    margin: 0;
   }
 
-  /* --- buttons --- */
+  /* ---------- controls ---------- */
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   button {
-    font-family: inherit;
-    font-size: 1rem;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    background: rgba(255,255,255,0.07);
+    font-family: var(--mono);
+    font-size: 0.92rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
     color: var(--ink);
-    padding: 14px 20px;
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    padding: 16px 12px;
     cursor: pointer;
-    transition: transform .08s ease, background .15s ease, border-color .15s ease;
+    transition: border-color .15s ease, color .15s ease, background .15s ease, transform .08s ease;
   }
-  button:hover { background: rgba(255,255,255,0.13); }
+  button:hover { background: rgba(246, 241, 231, 0.05); }
   button:active { transform: translateY(1px); }
-  button:disabled { opacity: .5; cursor: default; }
+  button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .choices .yes:hover { border-color: var(--genuine); color: var(--genuine); }
+  .choices .no:hover  { border-color: var(--fabricated); color: var(--fabricated); }
   .primary {
-    background: var(--gold); color: #221a0c; border-color: var(--gold);
-    font-weight: 700; font-size: 1.05rem; width: 100%; padding: 15px;
+    width: 100%;
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #241a09;
+    font-weight: 500;
   }
   .primary:hover { background: #f0c67d; }
 
-  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 22px; }
-  .choices button { font-size: 1.1rem; font-weight: 700; letter-spacing: .04em; padding: 18px 10px; }
-  .choices .real:hover { border-color: var(--real); color: var(--real); }
-  .choices .fake:hover { border-color: var(--fake); color: var(--fake); }
-  .hint { text-align: center; color: var(--muted); font-size: .8rem; margin-top: 12px; }
-  .hint kbd {
-    font-family: ui-monospace, Menlo, Consolas, monospace;
-    border: 1px solid var(--border); border-radius: 5px;
-    padding: 1px 5px; font-size: .78rem;
-  }
-
-  /* --- game --- */
-  .status { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: .9rem; color: var(--muted); }
-  .pips { display: flex; gap: 5px; }
-  .pip { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,0.16); }
-  .pip.hit { background: var(--real); }
-  .pip.miss { background: var(--fake); }
-  .pip.now { box-shadow: 0 0 0 3px rgba(229,181,103,.28); background: var(--gold); }
-
-  .word {
-    font-size: clamp(1.9rem, 8vw, 2.9rem);
-    font-weight: 700;
+  .keys {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    color: var(--muted);
     text-align: center;
-    letter-spacing: -0.01em;
-    word-break: break-word;
-    margin: 4px 0 2px;
   }
-  .pos { text-align: center; color: var(--gold); font-style: italic; font-size: .95rem; margin-bottom: 16px; }
-  .def { text-align: center; font-size: 1.15rem; color: #ece5f5; }
+  .keys kbd { border: 1px solid var(--rule); border-radius: 3px; padding: 1px 5px; }
+  @media (hover: none) { .keys { display: none; } }
 
-  .verdict { margin-top: 20px; border-top: 1px solid var(--border); padding-top: 18px; }
-  .verdict h3 { margin: 0 0 6px; font-size: 1.15rem; }
-  .verdict.right h3 { color: var(--real); }
-  .verdict.wrong h3 { color: var(--fake); }
-  .verdict p { margin: 0 0 16px; color: var(--muted); font-size: .95rem; }
-  .verdict em { color: var(--ink); font-style: italic; }
+  /* ---------- the verdict ---------- */
+  .verdict { border-top: 1px solid var(--rule); padding-top: 18px; display: flex; flex-direction: column; gap: 14px; }
+  .stamp {
+    align-self: center;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    padding: 7px 14px;
+    border: 2px solid currentColor;
+    border-radius: 3px;
+    transform: rotate(-4deg);
+    animation: press .22s cubic-bezier(.2, 1.5, .4, 1);
+  }
+  .stamp.genuine { color: var(--genuine); }
+  .stamp.fabricated { color: var(--fabricated); }
+  @keyframes press {
+    from { transform: rotate(-4deg) scale(1.5); opacity: 0; }
+    to   { transform: rotate(-4deg) scale(1); opacity: 1; }
+  }
+  .ruling { font-size: var(--step-1); font-weight: 600; margin: 0; text-align: center; }
+  .ruling.right { color: var(--genuine); }
+  .ruling.wrong { color: var(--fabricated); }
+  .note { color: var(--muted); margin: 0; font-size: 0.95rem; }
+  .note em { color: var(--ink); font-style: italic; }
 
-  /* --- results --- */
-  .score { text-align: center; font-size: clamp(3rem, 16vw, 4.6rem); font-weight: 700; line-height: 1; }
-  .score span { color: var(--muted); font-size: .4em; }
-  .rank { text-align: center; color: var(--gold); font-size: 1.2rem; font-style: italic; margin: 8px 0 4px; }
-  .blurb { text-align: center; color: var(--muted); font-size: .92rem; margin-bottom: 18px; }
-  ul.recap { list-style: none; padding: 0; margin: 0 0 20px; border-top: 1px solid var(--border); }
-  ul.recap li { display: flex; gap: 10px; align-items: baseline; padding: 9px 2px; border-bottom: 1px solid var(--border); font-size: .95rem; }
-  ul.recap .mark { flex: none; width: 1.2em; }
-  ul.recap .w { font-weight: 700; }
-  ul.recap .t { color: var(--muted); font-size: .85rem; margin-left: auto; flex: none; padding-left: 10px; }
+  /* ---------- results ---------- */
+  .score {
+    font-family: var(--display);
+    font-size: clamp(3.4rem, 18vw, 5rem);
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    letter-spacing: -0.03em;
+  }
+  .score .of { color: var(--muted); font-size: 0.36em; letter-spacing: 0; }
+  .rank {
+    font-family: var(--display);
+    font-style: italic;
+    font-size: var(--step-1);
+    color: var(--gold);
+    text-align: center;
+  }
+  .blurb { color: var(--muted); text-align: center; margin: 0; }
+  .recap { list-style: none; margin: 0; padding: 0; }
+  .recap li {
+    display: flex; align-items: baseline; gap: 12px;
+    padding: 10px 2px;
+    border-bottom: 1px solid var(--rule);
+    font-size: 0.95rem;
+  }
+  .recap li:first-child { border-top: 1px solid var(--rule); }
+  .recap .mark { font-family: var(--mono); font-size: 0.8rem; flex: none; width: 1.4em; }
+  .recap .mark.hit { color: var(--genuine); }
+  .recap .mark.miss { color: var(--fabricated); }
+  .recap .w { font-family: var(--display); font-weight: 700; }
+  .recap .t {
+    margin-left: auto; flex: none;
+    font-family: var(--mono); font-size: 0.66rem;
+    text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted);
+  }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .best { text-align: center; color: var(--muted); font-size: .85rem; margin-top: 16px; }
+  .best {
+    font-family: var(--mono); font-size: 0.68rem;
+    text-transform: uppercase; letter-spacing: 0.14em;
+    color: var(--muted); text-align: center;
+  }
 
-  .rules { color: var(--muted); font-size: .98rem; }
-  .rules li { margin-bottom: 8px; }
-  footer { color: var(--muted); font-size: .8rem; text-align: center; margin-top: 22px; }
-  footer a { color: var(--muted); }
+  .rules { margin: 0; padding-left: 1.1em; color: var(--ink-soft); display: flex; flex-direction: column; gap: 10px; }
+  .rules li::marker { color: var(--gold-dim); }
+  .rules strong { color: var(--ink); }
+  footer {
+    font-family: var(--mono); font-size: 0.66rem;
+    text-transform: uppercase; letter-spacing: 0.14em;
+    color: var(--muted); text-align: center; margin-top: 26px;
+  }
   .hidden { display: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
 
   <header>
-    <h1>Lexicon <span class="con">Artist</span></h1>
-    <div class="tagline">Ten words. Some are real. Some are conning you.</div>
+    <h1 class="wordmark"><span class="faux">Faux</span>cabulary</h1>
+    <div class="tagline">Ten words &middot; Half of them are lying</div>
   </header>
 
   <!-- ===== START ===== -->
-  <section id="start" class="card">
-    <ul class="rules">
-      <li>You get ten obscure words, each with a straight-faced definition.</li>
+  <section id="start" class="slip">
+    <ol class="rules">
+      <li>Ten obscure words, each with a straight-faced definition.</li>
       <li>Five are genuine English. Five were invented for this game.</li>
-      <li>Call each one <strong>REAL</strong> or <strong>FAKE</strong>. Score out of 10.</li>
-    </ul>
+      <li>Rule on each one — <strong>REAL</strong> or <strong>FAKE</strong>. Score out of 10.</li>
+    </ol>
     <button id="btn-start" class="primary">Deal me ten</button>
     <div id="best-line" class="best"></div>
   </section>
 
   <!-- ===== GAME ===== -->
-  <section id="game" class="hidden">
-    <div class="status">
-      <div id="counter">Word 1 of 10</div>
-      <div class="pips" id="pips"></div>
+  <section id="game" class="slip hidden">
+    <div class="slip-head">
+      <span id="counter">Entry 1 / 10</span>
+      <span class="pips" id="pips"></span>
     </div>
 
-    <div class="card">
-      <div class="word" id="word"></div>
+    <div class="entry">
+      <h2 class="headword" id="word"></h2>
       <div class="pos" id="pos"></div>
-      <div class="def" id="def"></div>
+      <p class="def" id="def"></p>
+    </div>
 
-      <div class="choices" id="choices">
-        <button class="real" id="btn-real">REAL</button>
-        <button class="fake" id="btn-fake">FAKE</button>
+    <div id="controls">
+      <div class="choices">
+        <button class="yes" id="btn-real">Real</button>
+        <button class="no" id="btn-fake">Fake</button>
       </div>
-      <div class="hint" id="hint"><kbd>&larr;</kbd> real &nbsp;&middot;&nbsp; <kbd>&rarr;</kbd> fake</div>
+      <div class="keys" style="margin-top:12px"><kbd>&larr;</kbd> real &nbsp;&middot;&nbsp; <kbd>&rarr;</kbd> fake</div>
+    </div>
 
-      <div class="verdict hidden" id="verdict">
-        <h3 id="verdict-title"></h3>
-        <p id="verdict-note"></p>
-        <button class="primary" id="btn-next">Next word</button>
-      </div>
+    <div class="verdict hidden" id="verdict">
+      <div class="stamp" id="stamp"></div>
+      <p class="ruling" id="ruling"></p>
+      <p class="note" id="note"></p>
+      <button class="primary" id="btn-next">Next word</button>
     </div>
   </section>
 
   <!-- ===== RESULTS ===== -->
-  <section id="results" class="hidden">
-    <div class="card">
-      <div class="score"><span id="final"></span><span>/10</span></div>
-      <div class="rank" id="rank"></div>
-      <div class="blurb" id="blurb"></div>
-      <ul class="recap" id="recap"></ul>
-      <div class="row">
-        <button id="btn-again" class="primary">Play again</button>
-        <button id="btn-share">Copy result</button>
-      </div>
-      <div id="best-line-2" class="best"></div>
+  <section id="results" class="slip hidden">
+    <div class="score"><span id="final"></span><span class="of">/10</span></div>
+    <div class="rank" id="rank"></div>
+    <p class="blurb" id="blurb"></p>
+    <ul class="recap" id="recap"></ul>
+    <div class="row">
+      <button id="btn-again" class="primary">Play again</button>
+      <button id="btn-share">Copy result</button>
     </div>
+    <div id="best-line-2" class="best"></div>
   </section>
 
-  <footer>Built for people who suspect the dictionary is bluffing.</footer>
+  <footer>For people who suspect the dictionary is bluffing</footer>
 </div>
 
 <script src="words.js"></script>
@@ -199,17 +328,17 @@
 
   var ROUND_LEN = 10;          // words per game
   var REAL_PER_ROUND = 5;      // how many of them are genuine
-  var STORE_BEST = "lexicon-artist.best";
-  var STORE_SEEN = "lexicon-artist.seen";
+  var STORE_BEST = "fauxcabulary.best";
+  var STORE_SEEN = "fauxcabulary.seen";
 
   var el = function (id) { return document.getElementById(id); };
   var deck = [];      // the ten words for this game
   var index = 0;      // which one we're on
   var score = 0;
   var answered = false;
-  var log = [];       // { word, real, guess, correct }
+  var log = [];       // { w, real, guess, correct }
 
-  /* ---------- storage (never let a blocked localStorage break the game) ---------- */
+  /* ---------- storage (a blocked localStorage must never break the game) ---------- */
   function read(key, fallback) {
     try {
       var v = localStorage.getItem(key);
@@ -220,7 +349,7 @@
     try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* ignore */ }
   }
 
-  /* ---------- deck building ---------- */
+  /* ---------- building the deck ---------- */
   function shuffle(list) {
     var a = list.slice();
     for (var i = a.length - 1; i > 0; i--) {
@@ -230,11 +359,10 @@
     return a;
   }
 
-  // Prefer words the player hasn't seen recently; reset that memory when a pool runs dry.
+  // Prefer words the player hasn't seen recently; forget a pool's history once it runs dry.
   function draw(pool, count, seen) {
     var fresh = pool.filter(function (item) { return seen.indexOf(item.w) === -1; });
     if (fresh.length < count) {
-      // Pool exhausted — forget this pool's history and start over.
       pool.forEach(function (item) {
         var at = seen.indexOf(item.w);
         if (at !== -1) seen.splice(at, 1);
@@ -242,6 +370,10 @@
       fresh = pool.slice();
     }
     return shuffle(fresh).slice(0, count);
+  }
+
+  function tag(entry, isReal) {
+    return { w: entry.w, pos: entry.pos, def: entry.def, note: entry.note, real: isReal };
   }
 
   function buildDeck() {
@@ -253,10 +385,6 @@
     return picked;
   }
 
-  function tag(entry, isReal) {
-    return { w: entry.w, pos: entry.pos, def: entry.def, note: entry.note, real: isReal };
-  }
-
   /* ---------- screens ---------- */
   function show(name) {
     ["start", "game", "results"].forEach(function (id) {
@@ -266,7 +394,7 @@
 
   function renderBest() {
     var best = read(STORE_BEST, null);
-    var text = best === null ? "" : "Personal best: " + best + "/10";
+    var text = best === null ? "" : "Personal best " + best + " / 10";
     el("best-line").textContent = text;
     el("best-line-2").textContent = text;
   }
@@ -277,7 +405,7 @@
       var cls = "pip";
       if (i < log.length) cls += log[i].correct ? " hit" : " miss";
       else if (i === index) cls += " now";
-      html += '<div class="' + cls + '"></div>';
+      html += '<span class="' + cls + '"></span>';
     }
     el("pips").innerHTML = html;
   }
@@ -285,12 +413,11 @@
   function renderWord() {
     var card = deck[index];
     answered = false;
-    el("counter").textContent = "Word " + (index + 1) + " of " + ROUND_LEN;
+    el("counter").textContent = "Entry " + (index + 1) + " / " + ROUND_LEN;
     el("word").textContent = card.w;
     el("pos").textContent = card.pos;
     el("def").textContent = card.def;
-    el("choices").classList.remove("hidden");
-    el("hint").classList.remove("hidden");
+    el("controls").classList.remove("hidden");
     el("verdict").classList.add("hidden");
     el("btn-real").disabled = false;
     el("btn-fake").disabled = false;
@@ -298,7 +425,7 @@
     window.scrollTo(0, 0);
   }
 
-  /* ---------- answering ---------- */
+  /* ---------- ruling on a word ---------- */
   function answer(saidReal) {
     if (answered) return;
     answered = true;
@@ -308,18 +435,17 @@
     if (correct) score++;
     log.push({ w: card.w, real: card.real, guess: saidReal, correct: correct });
 
-    var verdict = el("verdict");
-    verdict.className = "verdict " + (correct ? "right" : "wrong");
-    el("verdict-title").textContent =
-      (correct ? "Correct — " : "Nope — ") + card.w + " is " + (card.real ? "a real word." : "a fake.");
-    el("verdict-note").innerHTML = card.note;
+    el("stamp").className = "stamp " + (card.real ? "genuine" : "fabricated");
+    el("stamp").textContent = card.real ? "Genuine" : "Fabricated";
+    el("ruling").className = "ruling " + (correct ? "right" : "wrong");
+    el("ruling").textContent = correct ? "You called it." : "It got you.";
+    el("note").innerHTML = card.note;
     el("btn-next").textContent = (index === ROUND_LEN - 1) ? "See your score" : "Next word";
 
     el("btn-real").disabled = true;
     el("btn-fake").disabled = true;
-    el("choices").classList.add("hidden");
-    el("hint").classList.add("hidden");
-    verdict.classList.remove("hidden");
+    el("controls").classList.add("hidden");
+    el("verdict").classList.remove("hidden");
     renderPips();
     el("btn-next").focus();
   }
@@ -336,8 +462,8 @@
     { min: 9,  title: "Philologist",       blurb: "One slip in ten. Frankly suspicious." },
     { min: 7,  title: "Word Detective",    blurb: "You can smell a fake at twenty paces." },
     { min: 5,  title: "Educated Guesser",  blurb: "Better than a coin, which is more than most manage." },
-    { min: 3,  title: "Cheerfully Conned", blurb: "The made-up words got you. They were designed to." },
-    { min: 0,  title: "Mark",              blurb: "Every con artist needs one. Go again — you'll learn the tells." }
+    { min: 3,  title: "Cheerfully Conned", blurb: "The invented words got you. They were built to." },
+    { min: 0,  title: "The Mark",          blurb: "Every con needs one. Go again — you'll learn the tells." }
   ];
 
   function finish() {
@@ -351,7 +477,7 @@
 
     el("recap").innerHTML = log.map(function (r) {
       return '<li>' +
-        '<span class="mark">' + (r.correct ? "&#9989;" : "&#10060;") + '</span>' +
+        '<span class="mark ' + (r.correct ? "hit" : "miss") + '">' + (r.correct ? "&#10003;" : "&#10007;") + '</span>' +
         '<span class="w">' + r.w + '</span>' +
         '<span class="t">' + (r.real ? "real" : "fake") + '</span>' +
       '</li>';
@@ -363,14 +489,14 @@
   }
 
   function shareText() {
-    var grid = log.map(function (r) { return r.correct ? "✅" : "❌"; }).join("");
-    return "Lexicon Artist " + score + "/10\n" + grid + "\nCan you spot the fake words?";
+    var grid = log.map(function (r) { return r.correct ? "🟩" : "🟥"; }).join("");
+    return "Fauxcabulary " + score + "/10\n" + grid + "\nCan you spot the fake words?";
   }
 
   function copyResult() {
     var text = shareText();
     var done = function () {
-      el("btn-share").textContent = "Copied!";
+      el("btn-share").textContent = "Copied";
       setTimeout(function () { el("btn-share").textContent = "Copy result"; }, 1600);
     };
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -380,7 +506,7 @@
     }
   }
 
-  /* ---------- start / wiring ---------- */
+  /* ---------- wiring ---------- */
   function startGame() {
     deck = buildDeck();
     index = 0;

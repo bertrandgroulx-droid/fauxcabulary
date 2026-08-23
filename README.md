@@ -1,8 +1,8 @@
-# 📚 Lexicon Artist
+# 📚 Fauxcabulary
 
-**Ten words. Some are real. Some are conning you.**
+**Ten words. Half of them are lying.**
 
-Lexicon Artist shows you an obscure-sounding word with a straight-faced definition.
+Fauxcabulary shows you an obscure-sounding word with a straight-faced definition.
 You decide: **REAL** or **FAKE**. Ten words a game, one point each, score out of 10.
 
 Five of the ten are genuine English words with genuine definitions. The other five
@@ -33,7 +33,7 @@ python3 -m http.server 8000
 This repo ships `.github/workflows/pages.yml`, which publishes the site on every
 push to `main`. One-time setup: **Settings → Pages → Build and deployment → Source
 → GitHub Actions**. The site then lives at
-`https://<your-username>.github.io/lexicon-artist/`.
+`https://<your-username>.github.io/fauxcabulary/`.
 
 ## Adding words
 
