@@ -142,6 +142,29 @@
     padding: 4px 10px;
     border-radius: 999px;
   }
+  .entry-meta { display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+  .speak {
+    flex: none;
+    width: 38px;
+    height: 38px;
+    min-height: 0;
+    padding: 0;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: var(--muted);
+    border: 1.5px solid var(--rule);
+  }
+  .speak svg { width: 19px; height: 19px; display: block; }
+  .speak:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+  .speak.speaking { color: var(--accent); border-color: var(--accent); animation: sound 1.1s ease-in-out infinite; }
+  .speak[hidden] { display: none; }
+  @keyframes sound {
+    0%, 100% { box-shadow: 0 0 0 0 var(--accent-soft); }
+    50% { box-shadow: 0 0 0 7px var(--accent-soft); }
+  }
+
   .def {
     font-size: 1.25rem;
     line-height: 1.5;
@@ -327,7 +350,16 @@
 
     <div class="entry">
       <h2 class="headword" id="word"></h2>
-      <span class="pos" id="pos"></span>
+      <div class="entry-meta">
+        <span class="pos" id="pos"></span>
+        <button class="speak" id="btn-speak" type="button" aria-label="Hear the word spoken" title="Hear the word spoken">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M4 9.5v5h3.4L12 18.5v-13L7.4 9.5H4z" fill="currentColor" />
+            <path d="M15.8 8.8a4.6 4.6 0 0 1 0 6.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            <path d="M18.6 6.2a8.4 8.4 0 0 1 0 11.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        </button>
+      </div>
       <p class="def" id="def"></p>
     </div>
 
@@ -336,7 +368,7 @@
         <button class="yes" id="btn-real">Real word</button>
         <button class="no" id="btn-fake">Fake word</button>
       </div>
-      <p class="keys" style="margin:12px 0 0"><kbd>&larr;</kbd> real &nbsp;&middot;&nbsp; <kbd>&rarr;</kbd> fake</p>
+      <p class="keys" style="margin:12px 0 0"><kbd>&larr;</kbd> real &nbsp;&middot;&nbsp; <kbd>&rarr;</kbd> fake &nbsp;&middot;&nbsp; <kbd>S</kbd> hear it</p>
     </div>
 
     <div class="verdict hidden" id="verdict">
@@ -449,6 +481,54 @@
     return picked;
   }
 
+  /* ---------- saying the word out loud ---------- */
+  // Voice lists differ wildly by device, so aim for en-GB and work down a list of
+  // the good British voices that actually ship on common platforms.
+  var speech = window.speechSynthesis || null;
+  var voice = null;
+  var PREFERRED_VOICES = [
+    "Google UK English Female", "Google UK English Male",
+    "Serena", "Kate", "Stephanie", "Sonia", "Libby",     // Apple and Microsoft en-GB
+    "Daniel", "Oliver", "Ryan", "Arthur", "Malcolm"
+  ];
+
+  function pickVoice() {
+    if (!speech || !speech.getVoices) return null;
+    var british = (speech.getVoices() || []).filter(function (v) {
+      return /^en[-_]GB/i.test(v.lang || "");
+    });
+    for (var i = 0; i < PREFERRED_VOICES.length; i++) {
+      var match = british.filter(function (v) { return v.name.indexOf(PREFERRED_VOICES[i]) !== -1; })[0];
+      if (match) return match;
+    }
+    return british[0] || null;   // any British voice beats none
+  }
+
+  function speakWord() {
+    if (!speech || !deck.length) return;
+    try {
+      speech.cancel();                     // never let two words overlap
+      var u = new SpeechSynthesisUtterance(deck[view].w);
+      if (!voice) voice = pickVoice();
+      if (voice) u.voice = voice;
+      u.lang = "en-GB";                    // steers the fallback voice too
+      u.rate = 0.85;                       // unfamiliar words need the extra beat
+      var btn = el("btn-speak");
+      u.onstart = function () { btn.classList.add("speaking"); };
+      u.onend = u.onerror = function () { btn.classList.remove("speaking"); };
+      speech.speak(u);
+    } catch (e) { /* a device that won't speak simply stays quiet */ }
+  }
+
+  function setUpSpeech() {
+    if (!speech) { el("btn-speak").hidden = true; return; }
+    voice = pickVoice();
+    // Chrome populates the voice list asynchronously.
+    if (typeof speech.addEventListener === "function") {
+      speech.addEventListener("voiceschanged", function () { voice = pickVoice(); });
+    }
+  }
+
   /* ---------- screens ---------- */
   function show(name) {
     ["start", "game", "results"].forEach(function (id) {
@@ -485,6 +565,7 @@
 
   // Draws whichever word `i` points at — the live one, or an earlier one being reviewed.
   function renderAt(i) {
+    if (speech) speech.cancel();
     view = i;
     var card = deck[i];
     var past = log[i];
@@ -608,6 +689,7 @@
   el("btn-real").addEventListener("click", function () { answer(true); });
   el("btn-fake").addEventListener("click", function () { answer(false); });
   el("btn-next").addEventListener("click", next);
+  el("btn-speak").addEventListener("click", speakWord);
   el("btn-back").addEventListener("click", function () { if (view > 0) renderAt(view - 1); });
   el("btn-forward").addEventListener("click", function () { if (view < index) renderAt(view + 1); });
 
@@ -617,6 +699,7 @@
       if (e.key === "Enter" && !el("start").classList.contains("hidden")) startGame();
       return;
     }
+    if (e.key === "s" || e.key === "S") { e.preventDefault(); speakWord(); return; }
     if (!answered) {
       if (e.key === "ArrowLeft"  || e.key === "r" || e.key === "R") { e.preventDefault(); answer(true); }
       if (e.key === "ArrowRight" || e.key === "f" || e.key === "F") { e.preventDefault(); answer(false); }
@@ -628,6 +711,7 @@
     else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (view < index) renderAt(index); else next(); }
   });
 
+  setUpSpeech();
   renderBest();
 })();
 </script>

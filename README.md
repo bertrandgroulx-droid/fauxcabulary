@@ -19,10 +19,19 @@ which real word the fake one is impersonating.
 - Back and Forward buttons to step through the words you have already answered.
 - Score out of 10 with a rank, a per-word recap, and a copyable emoji result grid.
 - Personal best saved in the browser.
-- Keyboard play: `←` real, `→` fake; once answered, the arrows move through your
-  answers and `Enter` goes on.
+- A speaker button that reads the word aloud, asking the device for a British
+  (`en-GB`) voice and falling back to whatever the platform offers.
+- Keyboard play: `←` real, `→` fake, `S` to hear the word; once answered, the arrows
+  move through your answers and `Enter` goes on.
 - Light and dark themes, following whatever your phone is set to.
 - No build step, no dependencies, no tracking. Two files and a stylesheet in the head.
+
+Pronunciation uses the browser's built-in speech synthesis, so the exact voice depends
+on the device. The game asks for `en-GB` and works down a list of the good British
+voices that ship on common platforms — Google UK English on Android and Chrome, Serena
+or Daniel on Apple devices, Sonia or Libby on Windows — before settling for any British
+voice, then for the platform default. A device with no speech support simply hides the
+button.
 
 ## Run it locally
 
