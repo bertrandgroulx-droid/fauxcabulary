@@ -1,22 +1,24 @@
 # 📚 Fauxcabulary
 
-**Ten words. Half of them are lying.**
+**Ten words. Some of them are lying.**
 
 Fauxcabulary shows you an obscure-sounding word with a straight-faced definition.
 You decide: **REAL** or **FAKE**. Ten words a game, one point each, score out of 10.
 
-Five of the ten are genuine English words with genuine definitions. The other five
-were invented for this game — plausible shape, plausible meaning, no dictionary.
+How many of the ten are genuine is random — every word flips its own coin, so a round
+might hold three real words or eight, and counting won't help you. The rest were
+invented for this game: plausible shape, plausible meaning, no dictionary.
 After each guess you get the truth, plus a note: where the real word comes from, or
 which real word the fake one is impersonating.
 
 ## Features
 
-- 10 words per game, always 5 real and 5 fake, freshly shuffled.
+- 10 words per game with a random real/fake split, freshly shuffled.
 - Instant reveal after each answer, with etymology or the real word you were thinking of.
 - Score out of 10 with a rank, a per-word recap, and a copyable emoji result grid.
 - Personal best saved in the browser.
 - Keyboard play: `←` real, `→` fake, `Enter` next.
+- Light and dark themes, following whatever your phone is set to.
 - No build step, no dependencies, no tracking. Two files and a stylesheet in the head.
 
 ## Run it locally
@@ -50,8 +52,8 @@ Each entry looks like this:
 ```
 
 The game works out real vs. fake from which array the word is in, so you never have
-to set a flag. Add as many as you like to either array; the game keeps drawing 5 and 5
-and won't repeat a word until it has worked through the pool.
+to set a flag. Add as many as you like to either array; the game draws a random split
+each round and won't repeat a word until it has worked through the pool.
 
 Two rules of thumb that keep the game honest:
 

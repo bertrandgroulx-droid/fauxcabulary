@@ -2,40 +2,55 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Fauxcabulary</title>
-<meta name="description" content="Ten obscure words. Half of them are lying. Can you tell a real word from a well-dressed fake?" />
-<meta name="color-scheme" content="dark" />
-<meta name="theme-color" content="#14101d" />
+<meta name="description" content="Ten obscure words. Some of them are lying. Can you tell a real word from a well-dressed fake?" />
+<meta name="color-scheme" content="light dark" />
+<meta name="theme-color" content="#f6f7fb" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0e1016" media="(prefers-color-scheme: dark)" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#128218;</text></svg>" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;1,6..96,400&family=IBM+Plex+Mono:wght@400;500&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Public+Sans:ital,wght@0,400..700;1,400..600&display=swap" />
 <style>
-  /* Fauxcabulary — a deliberately single-theme design: a lamplit reading room.
-     Every colour is painted explicitly so the page holds on any host ground. */
   :root {
-    --ground: #14101d;
-    --ground-lift: #1b1628;
-    --slip: #221b30;
-    --ink: #f6f1e7;
-    --ink-soft: #ded5e6;
-    --muted: #a49bb5;
-    --rule: rgba(246, 241, 231, 0.14);
-    --gold: #e5b567;
-    --gold-dim: #a8823f;
-    --genuine: #5fd39a;
-    --fabricated: #f2777a;
+    /* light — cool, slightly blue-biased neutrals */
+    --ground: #f6f7fb;
+    --surface: #ffffff;
+    --surface-sunk: #f1f3f9;
+    --ink: #12141c;
+    --ink-soft: #3c4250;
+    --muted: #6a7284;
+    --rule: #e3e7f0;
+    --accent: #2b4acb;
+    --accent-soft: #eef1fe;
+    --genuine: #0b8f5f;
+    --genuine-soft: #e6f6ef;
+    --fabricated: #cf3030;
+    --fabricated-soft: #fdecec;
+    --shadow: 0 1px 2px rgba(18, 20, 28, .05), 0 12px 28px -12px rgba(18, 20, 28, .16);
 
-    --display: "Bodoni Moda", "Didot", "Playfair Display", Georgia, serif;
-    --body: "Spectral", Georgia, "Times New Roman", serif;
-    --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+    --display: "Bricolage Grotesque", ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+    --sans: "Public Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
 
-    --step-0: 1rem;
-    --step-1: 1.15rem;
-    --step-2: clamp(1.6rem, 5vw, 2.1rem);
-    --step-3: clamp(2.1rem, 9vw, 3.2rem);
-    --radius: 4px;
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #0e1016;
+      --surface: #171a22;
+      --surface-sunk: #1e222c;
+      --ink: #f4f6fa;
+      --ink-soft: #d2d8e4;
+      --muted: #949cac;
+      --rule: #272c38;
+      --accent: #8ba1ff;
+      --accent-soft: #1d2338;
+      --genuine: #3ed99b;
+      --genuine-soft: #12291f;
+      --fabricated: #ff7b7b;
+      --fabricated-soft: #2c1719;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 14px 32px -14px rgba(0, 0, 0, .7);
+    }
   }
 
   * { box-sizing: border-box; }
@@ -44,92 +59,94 @@
     margin: 0;
     min-height: 100vh;
     background: var(--ground);
-    background-image: radial-gradient(120% 80% at 50% -10%, var(--ground-lift), var(--ground) 65%);
-    background-attachment: fixed;
     color: var(--ink);
-    font-family: var(--body);
-    font-size: var(--step-0);
+    font-family: var(--sans);
+    font-size: 1rem;
     line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 28px 18px 56px;
+    padding: 28px 16px calc(40px + env(safe-area-inset-bottom));
   }
-  .wrap { width: 100%; max-width: 34rem; }
+  .wrap { width: 100%; max-width: 32rem; display: flex; flex-direction: column; gap: 20px; }
 
   /* ---------- masthead ---------- */
-  header { text-align: center; margin-bottom: 26px; }
+  header { text-align: center; }
   .wordmark {
     font-family: var(--display);
-    font-weight: 700;
-    font-size: var(--step-2);
-    letter-spacing: -0.015em;
+    font-weight: 800;
+    font-size: clamp(1.7rem, 6.5vw, 2.1rem);
+    letter-spacing: -0.03em;
     margin: 0;
     line-height: 1.1;
   }
-  .wordmark .faux { color: var(--gold); font-style: italic; }
-  .tagline {
-    font-family: var(--mono);
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.16em;
-    color: var(--muted);
-    margin-top: 10px;
-  }
+  .wordmark .faux { color: var(--accent); }
+  .tagline { color: var(--muted); font-size: 0.95rem; margin-top: 6px; }
 
-  /* ---------- the slip ---------- */
-  .slip {
-    background: var(--slip);
+  /* ---------- card ---------- */
+  .card {
+    background: var(--surface);
     border: 1px solid var(--rule);
-    border-top: 2px solid var(--gold-dim);
-    border-radius: var(--radius);
-    padding: 20px 22px 24px;
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    padding: 22px;
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 20px;
   }
-  .slip-head {
+
+  /* ---------- progress ---------- */
+  .progress { display: flex; flex-direction: column; gap: 10px; }
+  .track { display: flex; gap: 4px; }
+  .seg {
+    flex: 1;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--surface-sunk);
+    transition: background .25s ease, transform .25s ease;
+  }
+  .seg.hit { background: var(--genuine); }
+  .seg.miss { background: var(--fabricated); }
+  .seg.now { background: var(--accent); transform: scaleY(1.5); }
+  .meta {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
+    font-size: 0.85rem;
+    font-weight: 600;
     color: var(--muted);
+    font-variant-numeric: tabular-nums;
   }
-  .pips { display: flex; gap: 5px; }
-  .pip {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: rgba(246, 241, 231, 0.16);
-    transition: background .2s ease, box-shadow .2s ease;
-  }
-  .pip.hit { background: var(--genuine); }
-  .pip.miss { background: var(--fabricated); }
-  .pip.now { background: var(--gold); box-shadow: 0 0 0 3px rgba(229, 181, 103, 0.22); }
 
-  .entry { text-align: center; display: flex; flex-direction: column; gap: 8px; }
+  /* ---------- the entry ---------- */
+  .entry { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
   .headword {
     font-family: var(--display);
     font-weight: 700;
-    font-size: var(--step-3);
-    line-height: 1.08;
-    letter-spacing: -0.02em;
+    font-size: clamp(2rem, 8.5vw, 2.9rem);
+    line-height: 1.1;
+    letter-spacing: -0.035em;
     text-wrap: balance;
     overflow-wrap: break-word;
+    hyphens: auto;
     margin: 0;
+    width: 100%;
   }
   .pos {
-    font-family: var(--mono);
-    font-size: 0.7rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    letter-spacing: 0.2em;
-    color: var(--gold);
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 4px 10px;
+    border-radius: 999px;
   }
   .def {
-    font-size: var(--step-1);
+    font-size: 1.25rem;
+    line-height: 1.5;
     color: var(--ink-soft);
+    max-width: 26em;
     text-wrap: pretty;
     margin: 0;
   }
@@ -137,123 +154,122 @@
   /* ---------- controls ---------- */
   .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   button {
-    font-family: var(--mono);
-    font-size: 0.92rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+    font-family: var(--sans);
+    font-size: 1.05rem;
+    font-weight: 600;
     color: var(--ink);
-    background: transparent;
-    border: 1px solid var(--rule);
-    border-radius: var(--radius);
-    padding: 16px 12px;
+    background: var(--surface);
+    border: 1.5px solid var(--rule);
+    border-radius: 12px;
+    min-height: 56px;
+    padding: 14px 16px;
     cursor: pointer;
     transition: border-color .15s ease, color .15s ease, background .15s ease, transform .08s ease;
   }
-  button:hover { background: rgba(246, 241, 231, 0.05); }
+  button:hover { border-color: var(--muted); }
   button:active { transform: translateY(1px); }
-  button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
-  .choices .yes:hover { border-color: var(--genuine); color: var(--genuine); }
-  .choices .no:hover  { border-color: var(--fabricated); color: var(--fabricated); }
+  button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .choices .yes:hover { border-color: var(--genuine); color: var(--genuine); background: var(--genuine-soft); }
+  .choices .no:hover  { border-color: var(--fabricated); color: var(--fabricated); background: var(--fabricated-soft); }
   .primary {
     width: 100%;
-    background: var(--gold);
-    border-color: var(--gold);
-    color: #241a09;
-    font-weight: 500;
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #ffffff;
   }
-  .primary:hover { background: #f0c67d; }
+  @media (prefers-color-scheme: dark) { .primary { color: #0e1016; } }
+  .primary:hover { filter: brightness(1.08); border-color: var(--accent); }
 
-  .keys {
-    font-family: var(--mono);
-    font-size: 0.68rem;
-    letter-spacing: 0.08em;
-    color: var(--muted);
-    text-align: center;
+  .keys { font-size: 0.82rem; color: var(--muted); text-align: center; }
+  .keys kbd {
+    font-family: inherit; font-weight: 600;
+    border: 1px solid var(--rule); border-radius: 5px; padding: 1px 6px;
   }
-  .keys kbd { border: 1px solid var(--rule); border-radius: 3px; padding: 1px 5px; }
   @media (hover: none) { .keys { display: none; } }
 
-  /* ---------- the verdict ---------- */
-  .verdict { border-top: 1px solid var(--rule); padding-top: 18px; display: flex; flex-direction: column; gap: 14px; }
-  .stamp {
+  /* ---------- verdict ---------- */
+  .verdict { display: flex; flex-direction: column; gap: 16px; }
+  .badge {
     align-self: center;
-    font-family: var(--mono);
-    font-size: 0.78rem;
-    font-weight: 500;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    padding: 7px 14px;
-    border: 2px solid currentColor;
-    border-radius: 3px;
-    transform: rotate(-4deg);
-    animation: press .22s cubic-bezier(.2, 1.5, .4, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 8px 16px;
+    border-radius: 999px;
+    animation: pop .2s cubic-bezier(.2, 1.4, .4, 1);
   }
-  .stamp.genuine { color: var(--genuine); }
-  .stamp.fabricated { color: var(--fabricated); }
-  @keyframes press {
-    from { transform: rotate(-4deg) scale(1.5); opacity: 0; }
-    to   { transform: rotate(-4deg) scale(1); opacity: 1; }
-  }
-  .ruling { font-size: var(--step-1); font-weight: 600; margin: 0; text-align: center; }
+  .badge.genuine { color: var(--genuine); background: var(--genuine-soft); }
+  .badge.fabricated { color: var(--fabricated); background: var(--fabricated-soft); }
+  .badge .glyph { font-size: 1.05rem; line-height: 1; }
+  @keyframes pop { from { transform: scale(.86); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  .ruling { font-size: 1.15rem; font-weight: 700; text-align: center; margin: 0; }
   .ruling.right { color: var(--genuine); }
   .ruling.wrong { color: var(--fabricated); }
-  .note { color: var(--muted); margin: 0; font-size: 0.95rem; }
-  .note em { color: var(--ink); font-style: italic; }
+  .note {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 1rem;
+    background: var(--surface-sunk);
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+  .note em { font-style: italic; font-weight: 600; color: var(--ink); }
 
   /* ---------- results ---------- */
   .score {
     font-family: var(--display);
-    font-size: clamp(3.4rem, 18vw, 5rem);
-    font-weight: 700;
+    font-weight: 800;
+    font-size: clamp(3.4rem, 17vw, 4.6rem);
     line-height: 1;
     text-align: center;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.05em;
+    font-variant-numeric: tabular-nums;
   }
-  .score .of { color: var(--muted); font-size: 0.36em; letter-spacing: 0; }
+  .score .of { color: var(--muted); font-size: 0.34em; letter-spacing: -0.02em; }
   .rank {
     font-family: var(--display);
-    font-style: italic;
-    font-size: var(--step-1);
-    color: var(--gold);
+    font-weight: 700;
+    font-size: 1.3rem;
+    letter-spacing: -0.02em;
+    color: var(--accent);
     text-align: center;
   }
-  .blurb { color: var(--muted); text-align: center; margin: 0; }
+  .blurb { color: var(--muted); text-align: center; margin: 0; max-width: 26em; align-self: center; }
+  .split { text-align: center; font-size: 0.9rem; color: var(--muted); margin: 0; }
   .recap { list-style: none; margin: 0; padding: 0; }
   .recap li {
-    display: flex; align-items: baseline; gap: 12px;
-    padding: 10px 2px;
-    border-bottom: 1px solid var(--rule);
-    font-size: 0.95rem;
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 0;
+    border-top: 1px solid var(--rule);
+    font-size: 1rem;
   }
-  .recap li:first-child { border-top: 1px solid var(--rule); }
-  .recap .mark { font-family: var(--mono); font-size: 0.8rem; flex: none; width: 1.4em; }
+  .recap li:last-child { border-bottom: 1px solid var(--rule); }
+  .recap .mark { flex: none; width: 1.3em; font-weight: 700; text-align: center; }
   .recap .mark.hit { color: var(--genuine); }
   .recap .mark.miss { color: var(--fabricated); }
-  .recap .w { font-family: var(--display); font-weight: 700; }
+  .recap .w { font-family: var(--display); font-weight: 700; letter-spacing: -0.02em; overflow-wrap: anywhere; }
   .recap .t {
     margin-left: auto; flex: none;
-    font-family: var(--mono); font-size: 0.66rem;
-    text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted);
+    font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+    padding: 3px 9px; border-radius: 999px;
   }
+  .recap .t.real { color: var(--genuine); background: var(--genuine-soft); }
+  .recap .t.fake { color: var(--fabricated); background: var(--fabricated-soft); }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .best {
-    font-family: var(--mono); font-size: 0.68rem;
-    text-transform: uppercase; letter-spacing: 0.14em;
-    color: var(--muted); text-align: center;
-  }
+  .best { font-size: 0.85rem; font-weight: 600; color: var(--muted); text-align: center; }
 
-  .rules { margin: 0; padding-left: 1.1em; color: var(--ink-soft); display: flex; flex-direction: column; gap: 10px; }
-  .rules li::marker { color: var(--gold-dim); }
-  .rules strong { color: var(--ink); }
-  footer {
-    font-family: var(--mono); font-size: 0.66rem;
-    text-transform: uppercase; letter-spacing: 0.14em;
-    color: var(--muted); text-align: center; margin-top: 26px;
-  }
+  .rules { margin: 0; padding-left: 1.2em; color: var(--ink-soft); display: flex; flex-direction: column; gap: 10px; font-size: 1.05rem; }
+  .rules li::marker { color: var(--accent); font-weight: 700; }
+  .rules strong { color: var(--ink); font-weight: 700; }
+  footer { color: var(--muted); font-size: 0.85rem; text-align: center; }
   .hidden { display: none; }
 
   @media (prefers-reduced-motion: reduce) {
-    * { animation: none !important; transition: none !important; }
+    *, *::before, *::after { animation: none !important; transition: none !important; }
   }
 </style>
 </head>
@@ -262,43 +278,46 @@
 
   <header>
     <h1 class="wordmark"><span class="faux">Faux</span>cabulary</h1>
-    <div class="tagline">Ten words &middot; Half of them are lying</div>
+    <p class="tagline">Ten words. Some of them are lying.</p>
   </header>
 
   <!-- ===== START ===== -->
-  <section id="start" class="slip">
+  <section id="start" class="card">
     <ol class="rules">
       <li>Ten obscure words, each with a straight-faced definition.</li>
-      <li>Five are genuine English. Five were invented for this game.</li>
-      <li>Rule on each one — <strong>REAL</strong> or <strong>FAKE</strong>. Score out of 10.</li>
+      <li>Some are genuine English. The rest were invented for this game — and <strong>how many of each is random</strong>, so counting won't save you.</li>
+      <li>Call each one <strong>real</strong> or <strong>fake</strong>. Score out of 10.</li>
     </ol>
     <button id="btn-start" class="primary">Deal me ten</button>
     <div id="best-line" class="best"></div>
   </section>
 
   <!-- ===== GAME ===== -->
-  <section id="game" class="slip hidden">
-    <div class="slip-head">
-      <span id="counter">Entry 1 / 10</span>
-      <span class="pips" id="pips"></span>
+  <section id="game" class="card hidden">
+    <div class="progress">
+      <div class="track" id="track"></div>
+      <div class="meta">
+        <span id="counter">Word 1 of 10</span>
+        <span id="tally">0 correct</span>
+      </div>
     </div>
 
     <div class="entry">
       <h2 class="headword" id="word"></h2>
-      <div class="pos" id="pos"></div>
+      <span class="pos" id="pos"></span>
       <p class="def" id="def"></p>
     </div>
 
     <div id="controls">
       <div class="choices">
-        <button class="yes" id="btn-real">Real</button>
-        <button class="no" id="btn-fake">Fake</button>
+        <button class="yes" id="btn-real">Real word</button>
+        <button class="no" id="btn-fake">Fake word</button>
       </div>
-      <div class="keys" style="margin-top:12px"><kbd>&larr;</kbd> real &nbsp;&middot;&nbsp; <kbd>&rarr;</kbd> fake</div>
+      <p class="keys" style="margin:12px 0 0"><kbd>&larr;</kbd> real &nbsp;&middot;&nbsp; <kbd>&rarr;</kbd> fake</p>
     </div>
 
     <div class="verdict hidden" id="verdict">
-      <div class="stamp" id="stamp"></div>
+      <span class="badge" id="badge"></span>
       <p class="ruling" id="ruling"></p>
       <p class="note" id="note"></p>
       <button class="primary" id="btn-next">Next word</button>
@@ -306,10 +325,13 @@
   </section>
 
   <!-- ===== RESULTS ===== -->
-  <section id="results" class="slip hidden">
-    <div class="score"><span id="final"></span><span class="of">/10</span></div>
-    <div class="rank" id="rank"></div>
+  <section id="results" class="card hidden">
+    <div>
+      <div class="score"><span id="final"></span><span class="of">/10</span></div>
+      <div class="rank" id="rank"></div>
+    </div>
     <p class="blurb" id="blurb"></p>
+    <p class="split" id="split"></p>
     <ul class="recap" id="recap"></ul>
     <div class="row">
       <button id="btn-again" class="primary">Play again</button>
@@ -326,8 +348,7 @@
 (function () {
   "use strict";
 
-  var ROUND_LEN = 10;          // words per game
-  var REAL_PER_ROUND = 5;      // how many of them are genuine
+  var ROUND_LEN = 10;   // words per game
   var STORE_BEST = "fauxcabulary.best";
   var STORE_SEEN = "fauxcabulary.seen";
 
@@ -361,6 +382,7 @@
 
   // Prefer words the player hasn't seen recently; forget a pool's history once it runs dry.
   function draw(pool, count, seen) {
+    if (count === 0) return [];
     var fresh = pool.filter(function (item) { return seen.indexOf(item.w) === -1; });
     if (fresh.length < count) {
       pool.forEach(function (item) {
@@ -376,10 +398,19 @@
     return { w: entry.w, pos: entry.pos, def: entry.def, note: entry.note, real: isReal };
   }
 
+  // Every word flips its own coin, so the real/fake count is genuinely random —
+  // there is no split to count down against. Both pools are capped by their size.
+  function realCountForRound() {
+    var n = 0;
+    for (var i = 0; i < ROUND_LEN; i++) if (Math.random() < 0.5) n++;
+    return Math.min(Math.max(n, ROUND_LEN - FAKE_WORDS.length), REAL_WORDS.length);
+  }
+
   function buildDeck() {
     var seen = read(STORE_SEEN, []);
-    var reals = draw(REAL_WORDS, REAL_PER_ROUND, seen).map(function (x) { return tag(x, true); });
-    var fakes = draw(FAKE_WORDS, ROUND_LEN - REAL_PER_ROUND, seen).map(function (x) { return tag(x, false); });
+    var realCount = realCountForRound();
+    var reals = draw(REAL_WORDS, realCount, seen).map(function (x) { return tag(x, true); });
+    var fakes = draw(FAKE_WORDS, ROUND_LEN - realCount, seen).map(function (x) { return tag(x, false); });
     var picked = shuffle(reals.concat(fakes));
     write(STORE_SEEN, seen.concat(picked.map(function (x) { return x.w; })));
     return picked;
@@ -394,26 +425,27 @@
 
   function renderBest() {
     var best = read(STORE_BEST, null);
-    var text = best === null ? "" : "Personal best " + best + " / 10";
+    var text = best === null ? "" : "Personal best " + best + "/10";
     el("best-line").textContent = text;
     el("best-line-2").textContent = text;
   }
 
-  function renderPips() {
+  function renderProgress() {
     var html = "";
     for (var i = 0; i < ROUND_LEN; i++) {
-      var cls = "pip";
+      var cls = "seg";
       if (i < log.length) cls += log[i].correct ? " hit" : " miss";
       else if (i === index) cls += " now";
       html += '<span class="' + cls + '"></span>';
     }
-    el("pips").innerHTML = html;
+    el("track").innerHTML = html;
+    el("counter").textContent = "Word " + (index + 1) + " of " + ROUND_LEN;
+    el("tally").textContent = score + " correct";
   }
 
   function renderWord() {
     var card = deck[index];
     answered = false;
-    el("counter").textContent = "Entry " + (index + 1) + " / " + ROUND_LEN;
     el("word").textContent = card.w;
     el("pos").textContent = card.pos;
     el("def").textContent = card.def;
@@ -421,7 +453,7 @@
     el("verdict").classList.add("hidden");
     el("btn-real").disabled = false;
     el("btn-fake").disabled = false;
-    renderPips();
+    renderProgress();
     window.scrollTo(0, 0);
   }
 
@@ -435,8 +467,9 @@
     if (correct) score++;
     log.push({ w: card.w, real: card.real, guess: saidReal, correct: correct });
 
-    el("stamp").className = "stamp " + (card.real ? "genuine" : "fabricated");
-    el("stamp").textContent = card.real ? "Genuine" : "Fabricated";
+    el("badge").className = "badge " + (card.real ? "genuine" : "fabricated");
+    el("badge").innerHTML = '<span class="glyph">' + (card.real ? "&#10003;" : "&#10007;") + '</span>' +
+                            (card.real ? "Genuine word" : "Fabricated");
     el("ruling").className = "ruling " + (correct ? "right" : "wrong");
     el("ruling").textContent = correct ? "You called it." : "It got you.";
     el("note").innerHTML = card.note;
@@ -446,7 +479,7 @@
     el("btn-fake").disabled = true;
     el("controls").classList.add("hidden");
     el("verdict").classList.remove("hidden");
-    renderPips();
+    renderProgress();
     el("btn-next").focus();
   }
 
@@ -460,10 +493,10 @@
   var RANKS = [
     { min: 10, title: "Lexicographer",     blurb: "A perfect ten. The dictionary works for you now." },
     { min: 9,  title: "Philologist",       blurb: "One slip in ten. Frankly suspicious." },
-    { min: 7,  title: "Word Detective",    blurb: "You can smell a fake at twenty paces." },
-    { min: 5,  title: "Educated Guesser",  blurb: "Better than a coin, which is more than most manage." },
-    { min: 3,  title: "Cheerfully Conned", blurb: "The invented words got you. They were built to." },
-    { min: 0,  title: "The Mark",          blurb: "Every con needs one. Go again — you'll learn the tells." }
+    { min: 7,  title: "Word detective",    blurb: "You can smell a fake at twenty paces." },
+    { min: 5,  title: "Educated guesser",  blurb: "Better than a coin, which is more than most manage." },
+    { min: 3,  title: "Cheerfully conned", blurb: "The invented words got you. They were built to." },
+    { min: 0,  title: "The mark",          blurb: "Every con needs one. Go again — you'll learn the tells." }
   ];
 
   function finish() {
@@ -471,15 +504,19 @@
     if (score > best) write(STORE_BEST, score);
 
     var rank = RANKS.filter(function (r) { return score >= r.min; })[0];
+    var reals = log.filter(function (r) { return r.real; }).length;
+
     el("final").textContent = score;
     el("rank").textContent = rank.title;
     el("blurb").textContent = rank.blurb;
+    el("split").textContent = "This round held " + reals + " real " + (reals === 1 ? "word" : "words") +
+                              " and " + (ROUND_LEN - reals) + " fake.";
 
     el("recap").innerHTML = log.map(function (r) {
       return '<li>' +
         '<span class="mark ' + (r.correct ? "hit" : "miss") + '">' + (r.correct ? "&#10003;" : "&#10007;") + '</span>' +
         '<span class="w">' + r.w + '</span>' +
-        '<span class="t">' + (r.real ? "real" : "fake") + '</span>' +
+        '<span class="t ' + (r.real ? "real" : "fake") + '">' + (r.real ? "real" : "fake") + '</span>' +
       '</li>';
     }).join("");
 
