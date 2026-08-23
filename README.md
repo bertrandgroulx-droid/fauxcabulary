@@ -14,10 +14,13 @@ which real word the fake one is impersonating.
 ## Features
 
 - 10 words per game with a random real/fake split, freshly shuffled.
-- Instant reveal after each answer, with etymology or the real word you were thinking of.
+- Instant reveal after each answer — **Correct** or **Wrong**, the word's status, and
+  a note with the etymology or the real word you were thinking of.
+- Back and Forward buttons to step through the words you have already answered.
 - Score out of 10 with a rank, a per-word recap, and a copyable emoji result grid.
 - Personal best saved in the browser.
-- Keyboard play: `←` real, `→` fake, `Enter` next.
+- Keyboard play: `←` real, `→` fake; once answered, the arrows move through your
+  answers and `Enter` goes on.
 - Light and dark themes, following whatever your phone is set to.
 - No build step, no dependencies, no tracking. Two files and a stylesheet in the head.
 

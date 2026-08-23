@@ -22,8 +22,8 @@
     --ink-soft: #3c4250;
     --muted: #6a7284;
     --rule: #e3e7f0;
-    --accent: #2b4acb;
-    --accent-soft: #eef1fe;
+    --accent: #0b63d6;
+    --accent-soft: #e7f1fe;
     --genuine: #0b8f5f;
     --genuine-soft: #e6f6ef;
     --fabricated: #cf3030;
@@ -43,8 +43,8 @@
       --ink-soft: #d2d8e4;
       --muted: #949cac;
       --rule: #272c38;
-      --accent: #8ba1ff;
-      --accent-soft: #1d2338;
+      --accent: #5aa9ff;
+      --accent-soft: #10233b;
       --genuine: #3ed99b;
       --genuine-soft: #12291f;
       --fabricated: #ff7b7b;
@@ -218,13 +218,22 @@
 
   .truth {
     align-self: center;
-    background: var(--surface-sunk);
-    color: var(--ink);
     font-size: 0.95rem;
     font-weight: 700;
     padding: 7px 16px;
     border-radius: 999px;
   }
+  .truth.right { color: var(--genuine); background: var(--genuine-soft); }
+  .truth.wrong { color: var(--fabricated); background: var(--fabricated-soft); }
+
+  .said { text-align: center; font-size: 0.9rem; color: var(--muted); }
+
+  /* stepping back through words already answered */
+  .nav { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .nav button { min-height: 48px; font-size: 0.95rem; }
+  .nav button:disabled { opacity: .4; cursor: default; }
+  .nav button:disabled:hover { border-color: var(--rule); }
+  .seg.viewing { transform: scaleY(2); }
   .note {
     margin: 0;
     color: var(--ink-soft);
@@ -336,8 +345,14 @@
         <span id="ruling-text"></span>
       </p>
       <span class="truth" id="truth"></span>
+      <span class="said hidden" id="said"></span>
       <p class="note" id="note"></p>
       <button class="primary" id="btn-next">Next word</button>
+    </div>
+
+    <div class="nav hidden" id="nav">
+      <button id="btn-back">&larr; Back</button>
+      <button id="btn-forward">Forward &rarr;</button>
     </div>
   </section>
 
@@ -371,9 +386,10 @@
 
   var el = function (id) { return document.getElementById(id); };
   var deck = [];      // the ten words for this game
-  var index = 0;      // which one we're on
+  var index = 0;      // how far the game has progressed
+  var view = 0;       // which word is on screen (trails `index` while reviewing)
   var score = 0;
-  var answered = false;
+  var answered = false;   // has the word currently on screen been answered?
   var log = [];       // { w, real, guess, correct }
 
   /* ---------- storage (a blocked localStorage must never break the game) ---------- */
@@ -453,56 +469,73 @@
       var cls = "seg";
       if (i < log.length) cls += log[i].correct ? " hit" : " miss";
       else if (i === index) cls += " now";
+      if (i === view) cls += " viewing";
       html += '<span class="' + cls + '"></span>';
     }
     el("track").innerHTML = html;
-    el("counter").textContent = "Word " + (index + 1) + " of " + ROUND_LEN;
+    el("counter").textContent = "Word " + (view + 1) + " of " + ROUND_LEN + (view < index ? " \u00b7 reviewing" : "");
     el("tally").textContent = score + " correct";
   }
 
-  function renderWord() {
-    var card = deck[index];
-    answered = false;
+  function renderNav() {
+    el("nav").classList.toggle("hidden", index === 0);
+    el("btn-back").disabled = (view === 0);
+    el("btn-forward").disabled = (view >= index);
+  }
+
+  // Draws whichever word `i` points at — the live one, or an earlier one being reviewed.
+  function renderAt(i) {
+    view = i;
+    var card = deck[i];
+    var past = log[i];
+    var reviewing = (i < index);
+    answered = !!past;
+
     el("word").textContent = card.w;
     el("pos").textContent = card.pos;
     el("def").textContent = card.def;
-    el("controls").classList.remove("hidden");
-    el("verdict").classList.add("hidden");
-    el("btn-real").disabled = false;
-    el("btn-fake").disabled = false;
+
+    if (past) {
+      el("ruling").className = "ruling " + (past.correct ? "right" : "wrong");
+      el("ruling-icon").innerHTML = past.correct ? "&#10003;" : "&#10007;";
+      el("ruling-text").textContent = past.correct ? "Correct" : "Wrong";
+      el("truth").className = "truth " + (past.correct ? "right" : "wrong");
+      el("truth").textContent = past.real ? "Real Word" : "Fake Word";
+      el("note").innerHTML = card.note;
+      el("said").textContent = "You answered " + (past.guess ? "Real Word" : "Fake Word");
+      el("said").classList.toggle("hidden", !reviewing);
+      el("btn-next").textContent = (index === ROUND_LEN - 1) ? "See your score" : "Next word";
+      el("btn-next").classList.toggle("hidden", reviewing);
+      el("controls").classList.add("hidden");
+      el("verdict").classList.remove("hidden");
+      if (!reviewing) el("btn-next").focus();
+    } else {
+      el("btn-real").disabled = false;
+      el("btn-fake").disabled = false;
+      el("controls").classList.remove("hidden");
+      el("verdict").classList.add("hidden");
+    }
+
+    renderNav();
     renderProgress();
     window.scrollTo(0, 0);
   }
 
   /* ---------- ruling on a word ---------- */
   function answer(saidReal) {
-    if (answered) return;
-    answered = true;
+    if (answered || view !== index) return;
 
     var card = deck[index];
     var correct = (saidReal === card.real);
     if (correct) score++;
     log.push({ w: card.w, real: card.real, guess: saidReal, correct: correct });
-
-    el("ruling").className = "ruling " + (correct ? "right" : "wrong");
-    el("ruling-icon").innerHTML = correct ? "&#10003;" : "&#10007;";
-    el("ruling-text").textContent = correct ? "Correct" : "Wrong";
-    el("truth").textContent = card.real ? "Real Word" : "Fake Word";
-    el("note").innerHTML = card.note;
-    el("btn-next").textContent = (index === ROUND_LEN - 1) ? "See your score" : "Next word";
-
-    el("btn-real").disabled = true;
-    el("btn-fake").disabled = true;
-    el("controls").classList.add("hidden");
-    el("verdict").classList.remove("hidden");
-    renderProgress();
-    el("btn-next").focus();
+    renderAt(index);
   }
 
   function next() {
     index++;
     if (index >= ROUND_LEN) finish();
-    else renderWord();
+    else renderAt(index);
   }
 
   /* ---------- results ---------- */
@@ -566,7 +599,7 @@
     score = 0;
     log = [];
     show("game");
-    renderWord();
+    renderAt(0);
   }
 
   el("btn-start").addEventListener("click", startGame);
@@ -575,6 +608,8 @@
   el("btn-real").addEventListener("click", function () { answer(true); });
   el("btn-fake").addEventListener("click", function () { answer(false); });
   el("btn-next").addEventListener("click", next);
+  el("btn-back").addEventListener("click", function () { if (view > 0) renderAt(view - 1); });
+  el("btn-forward").addEventListener("click", function () { if (view < index) renderAt(view + 1); });
 
   document.addEventListener("keydown", function (e) {
     var playing = !el("game").classList.contains("hidden");
@@ -585,10 +620,12 @@
     if (!answered) {
       if (e.key === "ArrowLeft"  || e.key === "r" || e.key === "R") { e.preventDefault(); answer(true); }
       if (e.key === "ArrowRight" || e.key === "f" || e.key === "F") { e.preventDefault(); answer(false); }
-    } else if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      next();
+      return;
     }
+    // Once a word is answered, the arrows steer the history instead.
+    if (e.key === "ArrowLeft") { e.preventDefault(); if (view > 0) renderAt(view - 1); }
+    else if (e.key === "ArrowRight") { e.preventDefault(); if (view < index) renderAt(view + 1); else next(); }
+    else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (view < index) renderAt(index); else next(); }
   });
 
   renderBest();
