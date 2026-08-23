@@ -526,6 +526,12 @@
   }
 
   /* ---------- saying the word out loud ---------- */
+  // The game ships its own recordings: device speech synthesis sounds robotic on
+  // most phones, and iOS ships compact voices by default. Files are rendered by
+  // tools/make-audio.py. Synthesis stays on as a fallback for anything missing.
+  var AUDIO_DIR = "audio/";
+  var canPlayFiles = (typeof Audio === "function");
+  var clip = null;
   // Voice lists differ wildly by device, so aim for en-GB and work down a list of
   // the good British voices that actually ship on common platforms.
   var speech = window.speechSynthesis || null;
@@ -556,7 +562,35 @@
     return british[0] || null;
   }
 
+  function markSpeaking(on) {
+    el("btn-speak").classList.toggle("speaking", on);
+  }
+
+  // Load (but don't play) the clip for the word on screen, so the first tap is instant.
+  function loadClip(word) {
+    if (!canPlayFiles) return null;
+    var a = new Audio(AUDIO_DIR + word + ".mp3");
+    a.preload = "auto";
+    return a;
+  }
+
   function speakWord() {
+    if (clip) {
+      var failed = function () { markSpeaking(false); clip = null; speakSynthesised(); };
+      try {
+        clip.currentTime = 0;
+        clip.onended = function () { markSpeaking(false); };
+        clip.onerror = failed;
+        var playing = clip.play();
+        markSpeaking(true);
+        if (playing && playing.catch) playing.catch(failed);
+        return;
+      } catch (e) { failed(); return; }
+    }
+    speakSynthesised();
+  }
+
+  function speakSynthesised() {
     if (!speech || !deck.length) return;
     try {
       if (speech.speaking || speech.pending) speech.cancel();   // don't talk over ourselves
@@ -565,15 +599,16 @@
       if (voice) u.voice = voice;
       u.lang = "en-GB";                    // steers the fallback voice too
       u.rate = 0.85;                       // unfamiliar words need the extra beat
-      var btn = el("btn-speak");
-      u.onstart = function () { btn.classList.add("speaking"); };
-      u.onend = u.onerror = function () { btn.classList.remove("speaking"); };
+      u.onstart = function () { markSpeaking(true); };
+      u.onend = u.onerror = function () { markSpeaking(false); };
       speech.speak(u);
     } catch (e) { /* a device that won't speak simply stays quiet */ }
   }
 
   function setUpSpeech() {
-    if (!speech) { el("btn-speak").hidden = true; return; }
+    // Only hide the button where neither recordings nor synthesis are possible.
+    if (!canPlayFiles && !speech) { el("btn-speak").hidden = true; return; }
+    if (!speech) return;
     voice = pickVoice();
     // Chrome populates the voice list asynchronously.
     if (typeof speech.addEventListener === "function") {
@@ -627,6 +662,8 @@
   // Draws whichever word `i` points at — the live one, or an earlier one being reviewed.
   function renderAt(i) {
     if (speech && (speech.speaking || speech.pending)) speech.cancel();
+    if (clip) { try { clip.pause(); } catch (e) { /* nothing playing */ } }
+    markSpeaking(false);
     view = i;
     var card = deck[i];
     var past = log[i];
@@ -636,6 +673,7 @@
     el("word").textContent = card.w;
     el("pos").textContent = card.pos;
     el("def").textContent = card.def;
+    clip = loadClip(card.w);
 
     if (past) {
       el("ruling").className = "ruling " + (past.correct ? "right" : "wrong");

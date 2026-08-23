@@ -21,8 +21,8 @@ which real word the fake one is impersonating.
 - Back and Forward buttons to step through the words you have already answered.
 - Score out of 10 with a rank, a per-word recap, and a copyable emoji result grid.
 - Personal best saved in the browser.
-- A speaker button that reads the word aloud, asking the device for a female British
-  (`en-GB`) voice and falling back to whatever the platform offers.
+- A speaker button that reads the word aloud in a recorded British female voice —
+  the same voice on every device, not the phone's robotic built-in one.
 - Every real word comes with an example sentence, shown whether you got it right or not.
 - Keyboard play: `←` real, `→` fake, `S` to hear the word; once answered, the arrows
   move through your answers and `Enter` goes on.
