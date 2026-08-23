@@ -251,6 +251,18 @@
 
   .said { text-align: center; font-size: 0.9rem; color: var(--muted); }
 
+  /* real words get shown in use — the definition tells you what it means,
+     the example tells you what it is for */
+  .example {
+    margin: 0;
+    font-size: 1rem;
+    font-style: italic;
+    color: var(--ink-soft);
+    border-left: 3px solid var(--accent);
+    padding: 2px 0 2px 14px;
+  }
+  .example em { font-style: normal; font-weight: 700; color: var(--ink); }
+
   /* stepping back through words already answered */
   .nav { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .nav button { min-height: 48px; font-size: 0.95rem; }
@@ -303,8 +315,8 @@
     font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
     padding: 3px 9px; border-radius: 999px;
   }
-  .recap .t.real { color: var(--genuine); background: var(--genuine-soft); }
-  .recap .t.fake { color: var(--fabricated); background: var(--fabricated-soft); }
+  .recap .t.right { color: var(--genuine); background: var(--genuine-soft); }
+  .recap .t.wrong { color: var(--fabricated); background: var(--fabricated-soft); }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .best { font-size: 0.85rem; font-weight: 600; color: var(--muted); text-align: center; }
 
@@ -379,6 +391,7 @@
       <span class="truth" id="truth"></span>
       <span class="said hidden" id="said"></span>
       <p class="note" id="note"></p>
+      <p class="example hidden" id="example"></p>
       <button class="primary" id="btn-next">Next word</button>
     </div>
 
@@ -460,7 +473,8 @@
   }
 
   function tag(entry, isReal) {
-    return { w: entry.w, pos: entry.pos, def: entry.def, note: entry.note, real: isReal };
+    // `ex` is only present on real words — that is what gates the example sentence.
+    return { w: entry.w, pos: entry.pos, def: entry.def, note: entry.note, ex: entry.ex, real: isReal };
   }
 
   // Every word flips its own coin, so the real/fake count is genuinely random —
@@ -486,22 +500,30 @@
   // the good British voices that actually ship on common platforms.
   var speech = window.speechSynthesis || null;
   var voice = null;
-  var PREFERRED_VOICES = [
-    "Google UK English Female", "Google UK English Male",
-    "Serena", "Kate", "Stephanie", "Sonia", "Libby",     // Apple and Microsoft en-GB
-    "Daniel", "Oliver", "Ryan", "Arthur", "Malcolm"
+  // British and female where the device has one. Voices carry no gender field, so
+  // this goes by the names the major platforms actually ship.
+  var FEMALE_BRITISH = [
+    "Google UK English Female",                                  // Android, Chrome
+    "Serena", "Kate", "Stephanie", "Martha", "Jamie",             // Apple en-GB
+    "Sonia", "Libby", "Hazel", "Susan", "Maisie", "Abbi", "Bella" // Microsoft en-GB
   ];
+  var MALE_NAMES = /daniel|oliver|arthur|ryan|thomas|george|malcolm|male|alex|fred|gordon/i;
 
   function pickVoice() {
     if (!speech || !speech.getVoices) return null;
-    var british = (speech.getVoices() || []).filter(function (v) {
-      return /^en[-_]GB/i.test(v.lang || "");
-    });
-    for (var i = 0; i < PREFERRED_VOICES.length; i++) {
-      var match = british.filter(function (v) { return v.name.indexOf(PREFERRED_VOICES[i]) !== -1; })[0];
-      if (match) return match;
+    var voices = speech.getVoices() || [];
+    var british = voices.filter(function (v) { return /^en[-_]GB/i.test(v.lang || ""); });
+
+    for (var i = 0; i < FEMALE_BRITISH.length; i++) {
+      var named = british.filter(function (v) { return v.name.indexOf(FEMALE_BRITISH[i]) !== -1; })[0];
+      if (named) return named;
     }
-    return british[0] || null;   // any British voice beats none
+    // No name we recognise: take a British voice that isn't obviously male…
+    var unnamed = british.filter(function (v) { return !MALE_NAMES.test(v.name); })[0];
+    if (unnamed) return unnamed;
+    // …then any British voice, and failing that leave it unset so the device
+    // falls back to whichever voice the owner has chosen in their settings.
+    return british[0] || null;
   }
 
   function speakWord() {
@@ -583,6 +605,9 @@
       el("truth").className = "truth " + (past.correct ? "right" : "wrong");
       el("truth").textContent = past.real ? "Real Word" : "Fake Word";
       el("note").innerHTML = card.note;
+      // Only real words have a usage example; fakes have nothing to illustrate.
+      el("example").innerHTML = card.ex ? "&ldquo;" + card.ex + "&rdquo;" : "";
+      el("example").classList.toggle("hidden", !card.ex);
       el("said").textContent = "You answered " + (past.guess ? "Real Word" : "Fake Word");
       el("said").classList.toggle("hidden", !reviewing);
       el("btn-next").textContent = (index === ROUND_LEN - 1) ? "See your score" : "Next word";
@@ -646,7 +671,7 @@
       return '<li>' +
         '<span class="mark ' + (r.correct ? "hit" : "miss") + '">' + (r.correct ? "&#10003;" : "&#10007;") + '</span>' +
         '<span class="w">' + r.w + '</span>' +
-        '<span class="t ' + (r.real ? "real" : "fake") + '">' + (r.real ? "real" : "fake") + '</span>' +
+        '<span class="t ' + (r.correct ? "right" : "wrong") + '">' + (r.real ? "real" : "fake") + '</span>' +
       '</li>';
     }).join("");
 

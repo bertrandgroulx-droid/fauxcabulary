@@ -19,8 +19,9 @@ which real word the fake one is impersonating.
 - Back and Forward buttons to step through the words you have already answered.
 - Score out of 10 with a rank, a per-word recap, and a copyable emoji result grid.
 - Personal best saved in the browser.
-- A speaker button that reads the word aloud, asking the device for a British
+- A speaker button that reads the word aloud, asking the device for a female British
   (`en-GB`) voice and falling back to whatever the platform offers.
+- Every real word comes with an example sentence, shown whether you got it right or not.
 - Keyboard play: `←` real, `→` fake, `S` to hear the word; once answered, the arrows
   move through your answers and `Enter` goes on.
 - Light and dark themes, following whatever your phone is set to.
@@ -28,9 +29,10 @@ which real word the fake one is impersonating.
 
 Pronunciation uses the browser's built-in speech synthesis, so the exact voice depends
 on the device. The game asks for `en-GB` and works down a list of the good British
-voices that ship on common platforms — Google UK English on Android and Chrome, Serena
-or Daniel on Apple devices, Sonia or Libby on Windows — before settling for any British
-voice, then for the platform default. A device with no speech support simply hides the
+female British voices that ship on common platforms — Google UK English Female on
+Android and Chrome, Serena or Kate on Apple devices, Sonia or Libby on Windows — then
+any British voice that is not obviously male, then any British voice at all. If the
+device has none, no voice is set and it speaks in the owner's own default voice. A device with no speech support simply hides the
 button.
 
 ## Run it locally
@@ -51,8 +53,8 @@ push to `main`. One-time setup: **Settings → Pages → Build and deployment �
 
 ## Adding words
 
-All the content is in `words.js` — two arrays, `REAL_WORDS` (124 entries) and
-`FAKE_WORDS` (93 entries). That is enough for about 20 games before any word comes
+All the content is in `words.js` — two arrays, `REAL_WORDS` (126 entries) and
+`FAKE_WORDS` (93 entries). That is enough for about 18 games before any word comes
 round a second time.
 Each entry looks like this:
 
@@ -61,9 +63,13 @@ Each entry looks like this:
   w: "borborygmus",
   pos: "noun",
   def: "the rumbling noise made by gas moving through the intestines",
-  note: "Real. From Greek <em>borborygmos</em> — the word is basically the sound."
+  note: "Real. From Greek <em>borborygmos</em> — the word is basically the sound.",
+  ex: "The lecture hall fell silent just in time to hear the <em>borborygmus</em> from the back row."
 }
 ```
+
+`ex` belongs on real words only — it is what makes the example sentence appear, so a
+fake word must not have one.
 
 The game works out real vs. fake from which array the word is in, so you never have
 to set a flag. Add as many as you like to either array; the game draws a random split
