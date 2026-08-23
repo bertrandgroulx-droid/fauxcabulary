@@ -1,6 +1,6 @@
 # 📚 Fauxcabulary
 
-**Ten words. Some of them are lying.**
+**Ten words. Some of them are fake.**
 
 Fauxcabulary shows you an obscure-sounding word with a straight-faced definition.
 You decide: **REAL** or **FAKE**. Ten words a game, one point each, score out of 10.

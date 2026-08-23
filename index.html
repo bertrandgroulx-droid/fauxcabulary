@@ -4,14 +4,14 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Fauxcabulary</title>
-<meta name="description" content="Ten obscure words. Some of them are lying. Can you tell a real word from a well-dressed fake?" />
+<meta name="description" content="Ten obscure words. Some of them are fake. Can you tell a real word from a well-dressed fake?" />
 <meta name="color-scheme" content="light dark" />
 <meta name="theme-color" content="#f6f7fb" media="(prefers-color-scheme: light)" />
 <meta name="theme-color" content="#0e1016" media="(prefers-color-scheme: dark)" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#128218;</text></svg>" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Public+Sans:ital,wght@0,400..700;1,400..600&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Public+Sans:ital,wght@0,400..800;1,400..600&display=swap" />
 <style>
   :root {
     /* light — cool, slightly blue-biased neutrals */
@@ -30,7 +30,7 @@
     --fabricated-soft: #fdecec;
     --shadow: 0 1px 2px rgba(18, 20, 28, .05), 0 12px 28px -12px rgba(18, 20, 28, .16);
 
-    --display: "Bricolage Grotesque", ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+    --display: "Bricolage Grotesque", ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif; /* wordmark only */
     --sans: "Public Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   }
 
@@ -121,11 +121,11 @@
   /* ---------- the entry ---------- */
   .entry { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
   .headword {
-    font-family: var(--display);
+    font-family: var(--sans);
     font-weight: 700;
     font-size: clamp(2rem, 8.5vw, 2.9rem);
     line-height: 1.1;
-    letter-spacing: -0.035em;
+    letter-spacing: -0.02em;
     text-wrap: balance;
     overflow-wrap: break-word;
     hyphens: auto;
@@ -221,7 +221,6 @@
 
   /* ---------- results ---------- */
   .score {
-    font-family: var(--display);
     font-weight: 800;
     font-size: clamp(3.4rem, 17vw, 4.6rem);
     line-height: 1;
@@ -231,7 +230,6 @@
   }
   .score .of { color: var(--muted); font-size: 0.34em; letter-spacing: -0.02em; }
   .rank {
-    font-family: var(--display);
     font-weight: 700;
     font-size: 1.3rem;
     letter-spacing: -0.02em;
@@ -251,7 +249,7 @@
   .recap .mark { flex: none; width: 1.3em; font-weight: 700; text-align: center; }
   .recap .mark.hit { color: var(--genuine); }
   .recap .mark.miss { color: var(--fabricated); }
-  .recap .w { font-family: var(--display); font-weight: 700; letter-spacing: -0.02em; overflow-wrap: anywhere; }
+  .recap .w { font-weight: 700; letter-spacing: -0.01em; overflow-wrap: anywhere; }
   .recap .t {
     margin-left: auto; flex: none;
     font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
@@ -278,15 +276,15 @@
 
   <header>
     <h1 class="wordmark"><span class="faux">Faux</span>cabulary</h1>
-    <p class="tagline">Ten words. Some of them are lying.</p>
+    <p class="tagline">Ten words. Some of them are fake.</p>
   </header>
 
   <!-- ===== START ===== -->
   <section id="start" class="card">
     <ol class="rules">
-      <li>Ten obscure words, each with a straight-faced definition.</li>
-      <li>Some are genuine English. The rest were invented for this game — and <strong>how many of each is random</strong>, so counting won't save you.</li>
-      <li>Call each one <strong>real</strong> or <strong>fake</strong>. Score out of 10.</li>
+      <li>You get ten obscure words, each with a definition.</li>
+      <li>Some of the words are <strong>real</strong>. The rest are <strong>made up</strong>. How many of each changes every game, so counting won't help you.</li>
+      <li>Decide on each word. One point for every one you get right.</li>
     </ol>
     <button id="btn-start" class="primary">Deal me ten</button>
     <div id="best-line" class="best"></div>
