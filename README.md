@@ -14,6 +14,8 @@ which real word the fake one is impersonating.
 ## Features
 
 - 10 words per game with a random real/fake split, freshly shuffled.
+- Three difficulty levels — Easy, Tricky and Fiendish — each with its own words and
+  its own fakes. Your choice is remembered.
 - Instant reveal after each answer — **Correct** or **Wrong**, the word's status, and
   a note with the etymology or the real word you were thinking of.
 - Back and Forward buttons to step through the words you have already answered.
@@ -53,9 +55,9 @@ push to `main`. One-time setup: **Settings → Pages → Build and deployment �
 
 ## Adding words
 
-All the content is in `words.js` — two arrays, `REAL_WORDS` (126 entries) and
-`FAKE_WORDS` (93 entries). That is enough for about 18 games before any word comes
-round a second time.
+All the content is in `words.js` — two arrays, `REAL_WORDS` (176 entries) and
+`FAKE_WORDS` (138 entries), 314 words in all. Each level holds a little over 100 of
+them, which is about nine games before a word comes round again.
 Each entry looks like this:
 
 ```js
@@ -64,9 +66,16 @@ Each entry looks like this:
   pos: "noun",
   def: "the rumbling noise made by gas moving through the intestines",
   note: "Real. From Greek <em>borborygmos</em> — the word is basically the sound.",
-  ex: "The lecture hall fell silent just in time to hear the <em>borborygmus</em> from the back row."
+  ex: "The lecture hall fell silent just in time to hear the <em>borborygmus</em> from the back row.",
+  lvl: 3
 }
 ```
+
+`lvl` is the difficulty: 1 Easy, 2 Tricky, 3 Fiendish. Real words were graded by how
+often the word actually occurs in a large frequency corpus, split into thirds; fakes
+were graded by how convincingly they are built, since for an invented word
+plausibility *is* the difficulty. Both halves of a level have to match — an obvious
+fake next to a rare real word gives the game away.
 
 `ex` belongs on real words only — it is what makes the example sentence appear, so a
 fake word must not have one.

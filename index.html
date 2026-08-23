@@ -320,6 +320,16 @@
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .best { font-size: 0.85rem; font-weight: 600; color: var(--muted); text-align: center; }
 
+  .levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .levels button { min-height: 48px; font-size: 0.95rem; }
+  .levels button[aria-pressed="true"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) { .levels button[aria-pressed="true"] { color: #0e1016; } }
+  .level-note { margin: -8px 0 0; text-align: center; font-size: 0.9rem; color: var(--muted); }
+
   .rules { margin: 0; padding-left: 1.2em; color: var(--ink-soft); display: flex; flex-direction: column; gap: 10px; font-size: 1.05rem; }
   .rules li::marker { color: var(--accent); font-weight: 700; }
   .rules strong { color: var(--ink); font-weight: 700; }
@@ -346,6 +356,12 @@
       <li>Some of the words are <strong>real</strong>. The rest are <strong>made up</strong>. How many of each changes every game, so counting won't help you.</li>
       <li>Decide on each word. One point for every one you get right.</li>
     </ol>
+    <div class="levels" role="group" aria-label="Difficulty">
+      <button class="level" id="lvl-1" data-level="1">Easy</button>
+      <button class="level" id="lvl-2" data-level="2">Tricky</button>
+      <button class="level" id="lvl-3" data-level="3">Fiendish</button>
+    </div>
+    <p class="level-note" id="level-note"></p>
     <button id="btn-start" class="primary">Deal me ten</button>
     <div id="best-line" class="best"></div>
   </section>
@@ -427,9 +443,17 @@
 
   var ROUND_LEN = 10;   // words per game
   var STORE_BEST = "fauxcabulary.best";
+  var STORE_LEVEL = "fauxcabulary.level";
   var STORE_SEEN = "fauxcabulary.seen";
 
+  var LEVELS = {
+    1: { name: "Easy",     note: "Words you have probably met, and fakes that give themselves away." },
+    2: { name: "Tricky",   note: "Words you half-know, and fakes built to survive a second look." },
+    3: { name: "Fiendish", note: "The rarest words in the bank, against fakes made to be indistinguishable." }
+  };
+
   var el = function (id) { return document.getElementById(id); };
+  var level = 2;
   var deck = [];      // the ten words for this game
   var index = 0;      // how far the game has progressed
   var view = 0;       // which word is on screen (trails `index` while reviewing)
@@ -479,17 +503,23 @@
 
   // Every word flips its own coin, so the real/fake count is genuinely random —
   // there is no split to count down against. Both pools are capped by their size.
-  function realCountForRound() {
+  function realCountForRound(realsAvailable, fakesAvailable) {
     var n = 0;
     for (var i = 0; i < ROUND_LEN; i++) if (Math.random() < 0.5) n++;
-    return Math.min(Math.max(n, ROUND_LEN - FAKE_WORDS.length), REAL_WORDS.length);
+    return Math.min(Math.max(n, ROUND_LEN - fakesAvailable), realsAvailable);
+  }
+
+  function atLevel(pool) {
+    return pool.filter(function (x) { return x.lvl === level; });
   }
 
   function buildDeck() {
     var seen = read(STORE_SEEN, []);
-    var realCount = realCountForRound();
-    var reals = draw(REAL_WORDS, realCount, seen).map(function (x) { return tag(x, true); });
-    var fakes = draw(FAKE_WORDS, ROUND_LEN - realCount, seen).map(function (x) { return tag(x, false); });
+    var realPool = atLevel(REAL_WORDS);
+    var fakePool = atLevel(FAKE_WORDS);
+    var realCount = realCountForRound(realPool.length, fakePool.length);
+    var reals = draw(realPool, realCount, seen).map(function (x) { return tag(x, true); });
+    var fakes = draw(fakePool, ROUND_LEN - realCount, seen).map(function (x) { return tag(x, false); });
     var picked = shuffle(reals.concat(fakes));
     write(STORE_SEEN, seen.concat(picked.map(function (x) { return x.w; })));
     return picked;
@@ -556,6 +586,15 @@
     ["start", "game", "results"].forEach(function (id) {
       el(id).classList.toggle("hidden", id !== name);
     });
+  }
+
+  function setLevel(n) {
+    level = LEVELS[n] ? n : 2;
+    write(STORE_LEVEL, level);
+    [1, 2, 3].forEach(function (i) {
+      el("lvl-" + i).setAttribute("aria-pressed", i === level ? "true" : "false");
+    });
+    el("level-note").textContent = LEVELS[level].note;
   }
 
   function renderBest() {
@@ -664,8 +703,8 @@
     el("final").textContent = score;
     el("rank").textContent = rank.title;
     el("blurb").textContent = rank.blurb;
-    el("split").textContent = "This round held " + reals + " real " + (reals === 1 ? "word" : "words") +
-                              " and " + (ROUND_LEN - reals) + " fake.";
+    el("split").textContent = LEVELS[level].name + " — this round held " + reals + " real " +
+                              (reals === 1 ? "word" : "words") + " and " + (ROUND_LEN - reals) + " fake.";
 
     el("recap").innerHTML = log.map(function (r) {
       return '<li>' +
@@ -682,7 +721,8 @@
 
   function shareText() {
     var grid = log.map(function (r) { return r.correct ? "🟩" : "🟥"; }).join("");
-    var text = "Fauxcabulary " + score + "/10\n" + grid + "\nCan you spot the fake words?";
+    var text = "Fauxcabulary (" + LEVELS[level].name + ") " + score + "/10\n" + grid +
+               "\nCan you spot the fake words?";
     // Only worth attaching a link when the page came from somewhere shareable.
     if (typeof location !== "undefined" && /^https?:$/.test(location.protocol)) {
       text += "\n" + location.origin + location.pathname;
@@ -741,6 +781,10 @@
     else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (view < index) renderAt(index); else next(); }
   });
 
+  [1, 2, 3].forEach(function (i) {
+    el("lvl-" + i).addEventListener("click", function () { setLevel(i); });
+  });
+  setLevel(read(STORE_LEVEL, 2));
   setUpSpeech();
   renderBest();
 })();
