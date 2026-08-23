@@ -353,7 +353,7 @@
   <!-- ===== GAME ===== -->
   <section id="game" class="card hidden">
     <div class="progress">
-      <div class="track" id="track"></div>
+      <div class="track" id="track" role="img" aria-label="Progress through the ten words"></div>
       <div class="meta">
         <span id="counter">Word 1 of 10</span>
         <span id="tally">0 correct</span>
@@ -383,7 +383,7 @@
       <p class="keys" style="margin:12px 0 0"><kbd>&larr;</kbd> real &nbsp;&middot;&nbsp; <kbd>&rarr;</kbd> fake &nbsp;&middot;&nbsp; <kbd>S</kbd> hear it</p>
     </div>
 
-    <div class="verdict hidden" id="verdict">
+    <div class="verdict hidden" id="verdict" role="status" aria-live="polite">
       <p class="ruling" id="ruling">
         <span class="icon"><span class="glyph" id="ruling-icon"></span></span>
         <span id="ruling-text"></span>
@@ -529,7 +529,7 @@
   function speakWord() {
     if (!speech || !deck.length) return;
     try {
-      speech.cancel();                     // never let two words overlap
+      if (speech.speaking || speech.pending) speech.cancel();   // don't talk over ourselves
       var u = new SpeechSynthesisUtterance(deck[view].w);
       if (!voice) voice = pickVoice();
       if (voice) u.voice = voice;
@@ -587,7 +587,7 @@
 
   // Draws whichever word `i` points at — the live one, or an earlier one being reviewed.
   function renderAt(i) {
-    if (speech) speech.cancel();
+    if (speech && (speech.speaking || speech.pending)) speech.cancel();
     view = i;
     var card = deck[i];
     var past = log[i];
@@ -682,7 +682,12 @@
 
   function shareText() {
     var grid = log.map(function (r) { return r.correct ? "🟩" : "🟥"; }).join("");
-    return "Fauxcabulary " + score + "/10\n" + grid + "\nCan you spot the fake words?";
+    var text = "Fauxcabulary " + score + "/10\n" + grid + "\nCan you spot the fake words?";
+    // Only worth attaching a link when the page came from somewhere shareable.
+    if (typeof location !== "undefined" && /^https?:$/.test(location.protocol)) {
+      text += "\n" + location.origin + location.pathname;
+    }
+    return text;
   }
 
   function copyResult() {
