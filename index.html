@@ -189,26 +189,42 @@
 
   /* ---------- verdict ---------- */
   .verdict { display: flex; flex-direction: column; gap: 16px; }
-  .badge {
-    align-self: center;
-    display: inline-flex;
+  /* Colour carries one meaning only — whether you were right. The word's own
+     status sits below in neutral type, so green never has to mean two things. */
+  .ruling {
+    display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 0.9rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    padding: 8px 16px;
-    border-radius: 999px;
+    justify-content: center;
+    gap: 10px;
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
     animation: pop .2s cubic-bezier(.2, 1.4, .4, 1);
   }
-  .badge.genuine { color: var(--genuine); background: var(--genuine-soft); }
-  .badge.fabricated { color: var(--fabricated); background: var(--fabricated-soft); }
-  .badge .glyph { font-size: 1.05rem; line-height: 1; }
-  @keyframes pop { from { transform: scale(.86); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-  .ruling { font-size: 1.15rem; font-weight: 700; text-align: center; margin: 0; }
   .ruling.right { color: var(--genuine); }
   .ruling.wrong { color: var(--fabricated); }
+  .ruling .icon {
+    flex: none;
+    width: 1.7rem;
+    height: 1.7rem;
+    border-radius: 50%;
+    background: currentColor;
+    display: grid;
+    place-items: center;
+  }
+  .ruling .glyph { color: var(--surface); font-size: 0.95rem; font-weight: 700; line-height: 1; }
+  @keyframes pop { from { transform: scale(.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  .truth {
+    align-self: center;
+    background: var(--surface-sunk);
+    color: var(--ink);
+    font-size: 0.95rem;
+    font-weight: 700;
+    padding: 7px 16px;
+    border-radius: 999px;
+  }
   .note {
     margin: 0;
     color: var(--ink-soft);
@@ -315,8 +331,11 @@
     </div>
 
     <div class="verdict hidden" id="verdict">
-      <span class="badge" id="badge"></span>
-      <p class="ruling" id="ruling"></p>
+      <p class="ruling" id="ruling">
+        <span class="icon"><span class="glyph" id="ruling-icon"></span></span>
+        <span id="ruling-text"></span>
+      </p>
+      <span class="truth" id="truth"></span>
       <p class="note" id="note"></p>
       <button class="primary" id="btn-next">Next word</button>
     </div>
@@ -465,11 +484,10 @@
     if (correct) score++;
     log.push({ w: card.w, real: card.real, guess: saidReal, correct: correct });
 
-    el("badge").className = "badge " + (card.real ? "genuine" : "fabricated");
-    el("badge").innerHTML = '<span class="glyph">' + (card.real ? "&#10003;" : "&#10007;") + '</span>' +
-                            (card.real ? "Genuine word" : "Fabricated");
     el("ruling").className = "ruling " + (correct ? "right" : "wrong");
-    el("ruling").textContent = correct ? "You called it." : "It got you.";
+    el("ruling-icon").innerHTML = correct ? "&#10003;" : "&#10007;";
+    el("ruling-text").textContent = correct ? "Correct" : "Wrong";
+    el("truth").textContent = card.real ? "Real Word" : "Fake Word";
     el("note").innerHTML = card.note;
     el("btn-next").textContent = (index === ROUND_LEN - 1) ? "See your score" : "Next word";
 
