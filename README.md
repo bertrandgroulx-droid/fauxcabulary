@@ -42,7 +42,9 @@ push to `main`. One-time setup: **Settings → Pages → Build and deployment �
 
 ## Adding words
 
-All the content is in `words.js` — two arrays, `REAL_WORDS` and `FAKE_WORDS`.
+All the content is in `words.js` — two arrays, `REAL_WORDS` (124 entries) and
+`FAKE_WORDS` (93 entries). That is enough for about 20 games before any word comes
+round a second time.
 Each entry looks like this:
 
 ```js
@@ -63,7 +65,9 @@ Two rules of thumb that keep the game honest:
 1. **Check every real word in a dictionary before you add it.** If it isn't in
    Merriam-Webster, Collins or the OED, it belongs in `FAKE_WORDS` instead.
 2. **Check every fake word too** — the funniest inventions have a habit of turning
-   out to be real Scots dialect from 1740.
+   out to be real Scots dialect from 1740. Screening the bank against a large word
+   list caught exactly this: <em>crepusculine</em> and <em>somnifuge</em> were both
+   written as inventions and both turned out to be genuine words.
 
 ## Ideas for later
 
