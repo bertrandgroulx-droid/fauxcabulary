@@ -61,8 +61,8 @@ push to `main`. One-time setup: **Settings → Pages → Build and deployment �
 
 ## Adding words
 
-All the content is in `words.js` — two arrays, `REAL_WORDS` (408 entries) and
-`FAKE_WORDS` (293 entries), 701 words in all, drawn from geology, weather, bookbinding,
+All the content is in `words.js` — two arrays, `REAL_WORDS` (447 entries) and
+`FAKE_WORDS` (284 entries), 731 words in all, drawn from geology, weather, bookbinding,
 cookery, hand tools, feeling and a light seasoning of sport. Each level holds 210 to
 254 of them, which is around twenty-four games before a word comes round again.
 
@@ -108,6 +108,22 @@ The fix runs both ways: real words in the fake-shaped endings (`hircine`, `corvi
 endings (`glaucinous`, `ombrious`, `tacital`, `crepitic`). No suffix is now more than
 30 points off the overall fake rate. There is a check for this alongside the
 definition audit; run both after adding words.
+
+### So do the word shapes in general
+
+The suffix problem has a sibling: a word visibly made of two everyday words joined
+together — `puddlewink`, `kettlehush` — was 69% likely to be fake, because that is
+the easiest way to invent one. English has hundreds of genuine examples and the bank
+had almost none, so the fix was to add them: `scuttlebutt`, `spindrift`, `wolfsbane`,
+`gallowglass`, `slugabed`, `bellwether`, and a run of birds and plants — `wheatear`,
+`stonechat`, `corncrake`, `foxglove`, `nightshade`. The eight most transparent fake
+compounds were retired at the same time. Visible compounds are now 48% fake against a
+39% base rate.
+
+The general rule: **any surface feature a player can see without reading the
+definition** — ending, shape, length, construction — has to appear at close to the
+same rate on both sides. Three separate ones have leaked so far, each introduced by
+unconscious habit while writing.
 
 ### The definitions have to match
 
