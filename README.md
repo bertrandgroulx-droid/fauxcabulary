@@ -19,7 +19,11 @@ which real word the fake one is impersonating.
 - Instant reveal after each answer — **Correct** or **Wrong**, the word's status, and
   a note with the etymology or the real word you were thinking of.
 - Back and Forward buttons to step through the words you have already answered.
-- Score out of 10 with a rank, a per-word recap, and a copyable emoji result grid.
+- Score out of 10 with a rank and a copyable emoji result grid.
+- A per-word recap where any word can be tapped open for its definition, the note,
+  the example sentence, the answer you gave, and a speaker to hear it again.
+- Play again returns to the options, so difficulty and voice can be changed between
+  games.
 - Personal best saved in the browser.
 - A speaker button that reads the word aloud in a recorded British female voice —
   the same voice on every device, not the phone's robotic built-in one.

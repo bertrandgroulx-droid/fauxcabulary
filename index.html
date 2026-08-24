@@ -299,13 +299,37 @@
   .blurb { color: var(--muted); text-align: center; margin: 0; max-width: 26em; align-self: center; }
   .split { text-align: center; font-size: 0.9rem; color: var(--muted); margin: 0; }
   .recap { list-style: none; margin: 0; padding: 0; }
-  .recap li {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 0;
-    border-top: 1px solid var(--rule);
-    font-size: 1rem;
-  }
+  .recap li { border-top: 1px solid var(--rule); }
   .recap li:last-child { border-bottom: 1px solid var(--rule); }
+  .recap-row {
+    display: flex; align-items: center; gap: 12px;
+    width: 100%;
+    padding: 12px 2px;
+    min-height: 0;
+    background: none;
+    border: 0;
+    border-radius: 8px;
+    font-size: 1rem;
+    text-align: left;
+  }
+  .recap-row:hover { background: var(--surface-sunk); }
+  .chev {
+    flex: none; margin-left: 8px;
+    color: var(--muted); font-size: 0.75rem;
+    transition: transform .18s ease;
+  }
+  .recap-row[aria-expanded="true"] .chev { transform: rotate(180deg); }
+
+  .recap-detail {
+    display: flex; flex-direction: column; gap: 10px;
+    padding: 4px 2px 16px;
+  }
+  .detail-head { display: flex; align-items: center; gap: 10px; }
+  .detail-def { margin: 0; font-size: 1.05rem; color: var(--ink); }
+  .detail-note { margin: 0; font-size: 0.95rem; color: var(--muted); }
+  .detail-note em, .detail-def em { font-style: italic; color: var(--ink); font-weight: 600; }
+  .recap-detail .said { text-align: left; }
+  .recap-detail .example { font-size: 0.95rem; }
   .recap .mark { flex: none; width: 1.3em; font-weight: 700; text-align: center; }
   .recap .mark.hit { color: var(--genuine); }
   .recap .mark.miss { color: var(--fabricated); }
@@ -632,9 +656,22 @@
     if (playing && playing.catch) playing.catch(done);
   }
 
+  // Play a word on demand — used by the recap, where nothing is preloaded.
+  function playWord(word, btn) {
+    var lit = function (on) { if (btn) btn.classList.toggle("speaking", on); };
+    var fallback = function () { lit(false); speakSynthesised(word); };
+    if (!canPlayFiles) { fallback(); return; }
+    var a = new Audio(AUDIO_DIR + voiceName + "/" + word + ".mp3");
+    a.onended = function () { lit(false); };
+    a.onerror = fallback;
+    lit(true);
+    var playing = a.play();
+    if (playing && playing.catch) playing.catch(fallback);
+  }
+
   function speakWord() {
     if (clip) {
-      var failed = function () { markSpeaking(false); clip = null; speakSynthesised(); };
+      var failed = function () { markSpeaking(false); clip = null; speakSynthesised(deck[view].w); };
       try {
         clip.currentTime = 0;
         clip.onended = function () { markSpeaking(false); };
@@ -645,14 +682,14 @@
         return;
       } catch (e) { failed(); return; }
     }
-    speakSynthesised();
+    speakSynthesised(deck[view].w);
   }
 
-  function speakSynthesised() {
-    if (!speech || !deck.length) return;
+  function speakSynthesised(word) {
+    if (!speech || !word) return;
     try {
       if (speech.speaking || speech.pending) speech.cancel();   // don't talk over ourselves
-      var u = new SpeechSynthesisUtterance(deck[view].w);
+      var u = new SpeechSynthesisUtterance(word);
       if (!voice) voice = pickVoice();
       if (voice) u.voice = voice;
       u.lang = "en-GB";                    // steers the fallback voice too
@@ -802,17 +839,65 @@
     el("split").textContent = LEVELS[level].name + " — this round held " + reals + " real " +
                               (reals === 1 ? "word" : "words") + " and " + (ROUND_LEN - reals) + " fake.";
 
-    el("recap").innerHTML = log.map(function (r) {
+    el("recap").innerHTML = log.map(function (r, i) {
+      var card = deck[i];
       return '<li>' +
-        '<span class="mark ' + (r.correct ? "hit" : "miss") + '">' + (r.correct ? "&#10003;" : "&#10007;") + '</span>' +
-        '<span class="w">' + r.w + '</span>' +
-        '<span class="t ' + (r.correct ? "right" : "wrong") + '">' + (r.real ? "real" : "fake") + '</span>' +
+        '<button type="button" class="recap-row" id="recap-row-' + i + '" aria-expanded="false" aria-controls="recap-detail-' + i + '">' +
+          '<span class="mark ' + (r.correct ? "hit" : "miss") + '">' + (r.correct ? "&#10003;" : "&#10007;") + '</span>' +
+          '<span class="w">' + r.w + '</span>' +
+          '<span class="t ' + (r.correct ? "right" : "wrong") + '">' + (r.real ? "real" : "fake") + '</span>' +
+          '<span class="chev" aria-hidden="true">&#9662;</span>' +
+        '</button>' +
+        '<div class="recap-detail hidden" id="recap-detail-' + i + '">' +
+          '<div class="detail-head">' +
+            '<span class="pos">' + card.pos + '</span>' +
+            '<button type="button" class="speak" id="recap-speak-' + i + '" aria-label="Hear ' + r.w + '">' +
+              '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+                '<path d="M4 9.5v5h3.4L12 18.5v-13L7.4 9.5H4z" fill="currentColor" />' +
+                '<path d="M15.8 8.8a4.6 4.6 0 0 1 0 6.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />' +
+                '<path d="M18.6 6.2a8.4 8.4 0 0 1 0 11.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />' +
+              '</svg>' +
+            '</button>' +
+          '</div>' +
+          '<p class="detail-def">' + card.def + '</p>' +
+          '<p class="detail-note">' + card.note + '</p>' +
+          (card.ex ? '<p class="example">&ldquo;' + card.ex + '&rdquo;</p>' : '') +
+          '<p class="said">You answered ' + (r.guess ? "Real Word" : "Fake Word") + '</p>' +
+        '</div>' +
       '</li>';
     }).join("");
+
+    // One row open at a time keeps the list navigable on a phone.
+    log.forEach(function (r, i) {
+      // State lives in JS, not just in the markup, so a second game starts clean.
+      el("recap-row-" + i).setAttribute("aria-expanded", "false");
+      el("recap-detail-" + i).classList.add("hidden");
+      el("recap-row-" + i).addEventListener("click", function () { toggleDetail(i); });
+      el("recap-speak-" + i).addEventListener("click", function (e) {
+        e.stopPropagation();
+        playWord(r.w, el("recap-speak-" + i));
+      });
+    });
+    openDetail = -1;
 
     renderBest();
     show("results");
     window.scrollTo(0, 0);
+  }
+
+  var openDetail = -1;
+
+  function toggleDetail(i) {
+    var opening = (openDetail !== i);
+    if (openDetail !== -1) {
+      el("recap-detail-" + openDetail).classList.add("hidden");
+      el("recap-row-" + openDetail).setAttribute("aria-expanded", "false");
+    }
+    if (opening) {
+      el("recap-detail-" + i).classList.remove("hidden");
+      el("recap-row-" + i).setAttribute("aria-expanded", "true");
+    }
+    openDetail = opening ? i : -1;
   }
 
   function shareText() {
@@ -850,7 +935,7 @@
   }
 
   el("btn-start").addEventListener("click", startGame);
-  el("btn-again").addEventListener("click", startGame);
+  el("btn-again").addEventListener("click", function () { show("start"); window.scrollTo(0, 0); });
   el("btn-share").addEventListener("click", copyResult);
   el("btn-real").addEventListener("click", function () { answer(true); });
   el("btn-fake").addEventListener("click", function () { answer(false); });
