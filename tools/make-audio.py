@@ -23,7 +23,12 @@ import soundfile as sf
 import lameenc
 from kokoro_onnx import Kokoro
 
-VOICE = "bf_emma"     # British female
+VOICES = {            # the British female voices the game offers
+    "emma": "bf_emma",
+    "isabella": "bf_isabella",
+    "alice": "bf_alice",
+    "lily": "bf_lily",
+}
 SPEED = 0.9           # a shade slow: these words are unfamiliar
 BITRATE = 64          # mono, plenty for a single spoken word
 
@@ -59,31 +64,36 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", default="kokoro.onnx")
     ap.add_argument("--voices", default="voices.bin")
+    ap.add_argument("--voice", default="all", choices=list(VOICES) + ["all"],
+                    help="which voice to render (default: all of them)")
     ap.add_argument("--out", default=os.path.join(ROOT, "audio"))
     ap.add_argument("--only", nargs="*", help="render just these words")
     ap.add_argument("--force", action="store_true", help="re-render clips that already exist")
     args = ap.parse_args()
 
     words = args.only or words_from_bank()
-    os.makedirs(args.out, exist_ok=True)
     kokoro = Kokoro(args.model, args.voices)
+    chosen = list(VOICES) if args.voice == "all" else [args.voice]
 
-    made = skipped = 0
-    for i, word in enumerate(words, 1):
-        if not re.fullmatch(r"[a-z]+", word):
-            print(f"  skipping {word!r}: not a plain lowercase word", file=sys.stderr)
-            continue
-        path = os.path.join(args.out, word + ".mp3")
-        if os.path.exists(path) and not args.force:
-            skipped += 1
-            continue
-        audio, sr = kokoro.create(word + ".", voice=VOICE, speed=SPEED, lang="en-gb")
-        to_mp3(trim_silence(audio, sr), sr, path)
-        made += 1
-        if made % 25 == 0:
-            print(f"  {i}/{len(words)}…", flush=True)
-
-    print(f"done: {made} rendered, {skipped} already present, in {args.out}")
+    for name in chosen:
+        # Each voice gets its own directory: audio/<voice>/<word>.mp3
+        out_dir = os.path.join(args.out, name)
+        os.makedirs(out_dir, exist_ok=True)
+        made = skipped = 0
+        for i, word in enumerate(words, 1):
+            if not re.fullmatch(r"[a-z]+", word):
+                print(f"  skipping {word!r}: not a plain lowercase word", file=sys.stderr)
+                continue
+            path = os.path.join(out_dir, word + ".mp3")
+            if os.path.exists(path) and not args.force:
+                skipped += 1
+                continue
+            audio, sr = kokoro.create(word + ".", voice=VOICES[name], speed=SPEED, lang="en-gb")
+            to_mp3(trim_silence(audio, sr), sr, path)
+            made += 1
+            if made % 50 == 0:
+                print(f"  {name}: {i}/{len(words)}…", flush=True)
+        print(f"{name}: {made} rendered, {skipped} already present, in {out_dir}", flush=True)
 
 
 if __name__ == "__main__":

@@ -23,6 +23,8 @@ which real word the fake one is impersonating.
 - Personal best saved in the browser.
 - A speaker button that reads the word aloud in a recorded British female voice —
   the same voice on every device, not the phone's robotic built-in one.
+- Four voices to choose from — Emma, Isabella, Alice and Lily. Tapping one plays a
+  word in it, and the choice is remembered.
 - Every real word comes with an example sentence, shown whether you got it right or not.
 - Keyboard play: `←` real, `→` fake, `S` to hear the word; once answered, the arrows
   move through your answers and `Enter` goes on.
