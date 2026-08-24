@@ -61,10 +61,14 @@ push to `main`. One-time setup: **Settings → Pages → Build and deployment �
 
 ## Adding words
 
-All the content is in `words.js` — two arrays, `REAL_WORDS` (303 entries) and
-`FAKE_WORDS` (234 entries), 537 words in all, including a run of sports terms real
-and invented. Each level holds 155 to 190 of them, which is fifteen games or more
-before a word comes round again.
+All the content is in `words.js` — two arrays, `REAL_WORDS` (408 entries) and
+`FAKE_WORDS` (293 entries), 701 words in all, drawn from geology, weather, bookbinding,
+cookery, hand tools, feeling and a light seasoning of sport. Each level holds 210 to
+254 of them, which is around twenty-four games before a word comes round again.
+
+No single subject should dominate. Sport is about 5% of the bank; when a category
+starts to feel repetitive in play, the fix is to trim it and widen the rest rather
+than to add more of the same.
 Each entry looks like this:
 
 ```js
@@ -90,6 +94,20 @@ fake word must not have one.
 The game works out real vs. fake from which array the word is in, so you never have
 to set a flag. Add as many as you like to either array; the game draws a random split
 each round and won't repeat a word until it has worked through the pool.
+
+### The word shapes have to match too
+
+A player noticed that words ending in `-ine` were usually fake, and they were right:
+41 of the 46 of them. The same held for `-ling`, `-ick` and `-ish`, while `-ous`,
+`-ious` and `-al` almost always meant real. That is enough to win on without reading a
+definition, and it came from habit — reaching for Latinate `-ine` when inventing and
+picking `-ous` words when choosing real ones.
+
+The fix runs both ways: real words in the fake-shaped endings (`hircine`, `corvine`,
+`quisling`, `bailiwick`, `mawkish`, `noisome`) and invented ones in the real-shaped
+endings (`glaucinous`, `ombrious`, `tacital`, `crepitic`). No suffix is now more than
+30 points off the overall fake rate. There is a check for this alongside the
+definition audit; run both after adding words.
 
 ### The definitions have to match
 
