@@ -24,7 +24,7 @@ which real word the fake one is impersonating.
   the example sentence, the answer you gave, and a speaker to hear it again.
 - Play again returns to the options, so difficulty and voice can be changed between
   games.
-- Personal best saved in the browser.
+- Personal best saved per difficulty, and labelled with the level it was set at.
 - A speaker button that reads the word aloud in a recorded British female voice —
   the same voice on every device, not the phone's robotic built-in one.
 - Four voices to choose from — Emma, Isabella, Alice and Lily. Tapping one plays a

@@ -497,7 +497,8 @@
   "use strict";
 
   var ROUND_LEN = 10;   // words per game
-  var STORE_BEST = "fauxcabulary.best";
+  var STORE_BESTS = "fauxcabulary.bests";        // { level: score }
+  var STORE_BEST_LEGACY = "fauxcabulary.best";   // a single score, from before levels existed
   var STORE_LEVEL = "fauxcabulary.level";
   var STORE_VOICE = "fauxcabulary.voice";
   var STORE_SEEN = "fauxcabulary.seen";
@@ -725,11 +726,21 @@
       el("lvl-" + i).setAttribute("aria-pressed", i === level ? "true" : "false");
     });
     el("level-note").textContent = LEVELS[level].note;
+    renderBest();
   }
 
   function renderBest() {
-    var best = read(STORE_BEST, null);
-    var text = best === null ? "" : "Personal best " + best + "/10";
+    var bests = read(STORE_BESTS, {});
+    var best = bests[level];
+    var text;
+    if (best !== undefined) {
+      text = "Personal best at " + LEVELS[level].name + " — " + best + "/10";
+    } else {
+      // A score saved before the game had levels: keep showing it, but don't
+      // claim a level for it, because we genuinely don't know which it was.
+      var legacy = read(STORE_BEST_LEGACY, null);
+      text = legacy === null ? "" : "Earlier best " + legacy + "/10";
+    }
     el("best-line").textContent = text;
     el("best-line-2").textContent = text;
   }
@@ -827,8 +838,11 @@
   ];
 
   function finish() {
-    var best = read(STORE_BEST, 0);
-    if (score > best) write(STORE_BEST, score);
+    var bests = read(STORE_BESTS, {});
+    if (bests[level] === undefined || score > bests[level]) {
+      bests[level] = score;
+      write(STORE_BESTS, bests);
+    }
 
     var rank = RANKS.filter(function (r) { return score >= r.min; })[0];
     var reals = log.filter(function (r) { return r.real; }).length;
