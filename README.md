@@ -61,9 +61,10 @@ push to `main`. One-time setup: **Settings → Pages → Build and deployment �
 
 ## Adding words
 
-All the content is in `words.js` — two arrays, `REAL_WORDS` (176 entries) and
-`FAKE_WORDS` (138 entries), 314 words in all. Each level holds a little over 100 of
-them, which is about nine games before a word comes round again.
+All the content is in `words.js` — two arrays, `REAL_WORDS` (303 entries) and
+`FAKE_WORDS` (234 entries), 537 words in all, including a run of sports terms real
+and invented. Each level holds 155 to 190 of them, which is fifteen games or more
+before a word comes round again.
 Each entry looks like this:
 
 ```js
@@ -90,10 +91,28 @@ The game works out real vs. fake from which array the word is in, so you never h
 to set a flag. Add as many as you like to either array; the game draws a random split
 each round and won't repeat a word until it has worked through the pool.
 
-Two rules of thumb that keep the game honest:
+### The definitions have to match
+
+The hardest part of this game is not inventing words, it is writing definitions that
+give nothing away. A player who notices that real definitions are terse and fake ones
+are lyrical can win without knowing a single word. An audit of an earlier version
+found exactly that: 18% of real definitions contained a semicolon and 0% of fakes did,
+because a semicolon means a second sense and only real words had been given one. Real
+definitions used 'or' in 23% of cases against 1% of fakes, and at Easy the real
+definitions averaged 5.5 words against the fakes' 8.6.
+
+So fake definitions are written to the same distribution as real ones — second senses
+after a semicolon, alternatives with 'or', the same share of terse three-word
+definitions and long specific ones, the same rate of definite-article openings, and
+matching average length **within each level**. Every marker is currently within four
+percentage points. Worth re-checking after adding a batch of words, since it is easy
+to drift.
+
+Two more rules of thumb that keep the game honest:
 
 1. **Check every real word in a dictionary before you add it.** If it isn't in
    Merriam-Webster, Collins or the OED, it belongs in `FAKE_WORDS` instead.
+   Screening the whole bank against a large word list is the quick way to do this.
 2. **Check every fake word too** — the funniest inventions have a habit of turning
    out to be real Scots dialect from 1740. Screening the bank against a large word
    list caught exactly this: <em>crepusculine</em> and <em>somnifuge</em> were both
