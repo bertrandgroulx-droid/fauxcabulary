@@ -88,7 +88,9 @@ def main():
             if os.path.exists(path) and not args.force:
                 skipped += 1
                 continue
-            audio, sr = kokoro.create(word + ".", voice=VOICES[name], speed=SPEED, lang="en-gb")
+            # No full stop: sentence-final punctuation makes the model release the last
+            # consonant into an extra syllable — "haboob" comes out as "haboob-eh".
+            audio, sr = kokoro.create(word, voice=VOICES[name], speed=SPEED, lang="en-gb")
             to_mp3(trim_silence(audio, sr), sr, path)
             made += 1
             if made % 50 == 0:
