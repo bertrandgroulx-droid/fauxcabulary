@@ -92,7 +92,8 @@ fake next to a rare real word gives the game away.
 fake word must not have one.
 
 The game works out real vs. fake from which array the word is in, so you never have
-to set a flag. Add as many as you like to either array; the game draws a random split
+to set a flag. By convention a real word's note opens "Real" and an invented one's
+opens "Fake word", matching the label shown on the card. Add as many as you like to either array; the game draws a random split
 each round and won't repeat a word until it has worked through the pool.
 
 ### The word shapes have to match too
