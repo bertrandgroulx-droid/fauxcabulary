@@ -59,6 +59,21 @@ push to `main`. One-time setup: **Settings → Pages → Build and deployment �
 → GitHub Actions**. The site then lives at
 `https://<your-username>.github.io/fauxcabulary/`.
 
+## Tests and audits
+
+```sh
+node tests/run-all.js                         # seven suites, drive the real game logic
+node tools/audit.js --dict dict.txt --freq freq.txt   # fairness audit of the word bank
+```
+
+Run the suites after touching `index.html`, and the audit after touching `words.js`.
+
+## Building a different game on this
+
+`RECIPE.md` is a self-contained brief for making another real-or-fake game in this
+shape — fake laws, invented bird names, imaginary cocktails — including every content
+rule that was learned the hard way here.
+
 ## Adding words
 
 All the content is in `words.js` — two arrays, `REAL_WORDS` (447 entries) and
