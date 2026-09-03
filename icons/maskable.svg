@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Android crops to a circle of ~66% width, so the mark sits inside that safe zone -->
+  <rect width="512" height="512" fill="#0b63d6"/>
+  <g transform="translate(256,256) scale(0.62) translate(-256,-256)">
+    <rect x="152" y="112" width="60" height="288" rx="10" fill="#fff"/>
+    <rect x="152" y="112" width="216" height="60" rx="10" fill="#fff"/>
+    <rect x="152" y="226" width="60" height="60" fill="#fff"/>
+    <rect x="232" y="226" width="52" height="60" rx="10" fill="#fff"/>
+    <rect x="304" y="226" width="52" height="60" rx="10" fill="#fff"/>
+  </g>
+</svg>

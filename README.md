@@ -43,6 +43,18 @@ any British voice that is not obviously male, then any British voice at all. If 
 device has none, no voice is set and it speaks in the owner's own default voice. A device with no speech support simply hides the
 button.
 
+## Installing it on a phone
+
+The game ships a web manifest and icon set, so **Add to Home Screen** on iOS or
+**Install app** on Android gives it a real icon and launches it without browser
+chrome. The mark is an **F** whose middle arm has been forged in three pieces —
+part of the letter is genuine, part fabricated, which is the game.
+
+`icons/icon.svg` is the source. `icons/maskable.svg` is the same mark scaled into
+Android's safe zone, since the circular mask crops the corners. The PNGs are rendered
+from those two and flattened to opaque RGB, because iOS composites black behind any
+transparency.
+
 ## Run it locally
 
 It's a static site — double-click `index.html`, or serve the folder:
