@@ -48,12 +48,13 @@ button.
 The game ships a web manifest and icon set, so **Add to Home Screen** on iOS or
 **Install app** on Android gives it a real icon and launches it without browser
 chrome. The mark is an **F** whose middle arm has been forged in three pieces —
-part of the letter is genuine, part fabricated, which is the game.
+part of the letter is genuine, part fabricated, which is the game. It is drawn in the
+game's azure on near-black, so it sits well on a light or a dark wallpaper.
 
 `icons/icon.svg` is the source. `icons/maskable.svg` is the same mark scaled into
-Android's safe zone, since the circular mask crops the corners. The PNGs are rendered
-from those two and flattened to opaque RGB, because iOS composites black behind any
-transparency.
+Android's safe zone, since the circular mask crops the corners. The PNGs are rasterised from those two with `cairosvg` and flattened to opaque RGB,
+because iOS composites black behind any transparency. Rasterise rather than screenshot
+a browser: a headless capture silently left the bottom of the canvas unpainted.
 
 ## Run it locally
 
