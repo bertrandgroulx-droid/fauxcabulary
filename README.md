@@ -51,10 +51,26 @@ chrome. The mark is an **F** whose middle arm has been forged in three pieces â€
 part of the letter is genuine, part fabricated, which is the game. It is drawn in the
 game's azure on near-black, so it sits well on a light or a dark wallpaper.
 
-`icons/icon.svg` is the source. `icons/maskable.svg` is the same mark scaled into
-Android's safe zone, since the circular mask crops the corners. The PNGs are rasterised from those two with `cairosvg` and flattened to opaque RGB,
-because iOS composites black behind any transparency. Rasterise rather than screenshot
-a browser: a headless capture silently left the bottom of the canvas unpainted.
+`tools/make-icons.py` draws the mark and rasterises the whole set:
+
+```sh
+pip install cairosvg pillow
+python3 tools/make-icons.py
+```
+
+The geometry used to live twice, hand-written, in `icons/icon.svg` and
+`icons/maskable.svg` â€” moving the middle arm meant editing both and hoping. It lives
+in the script once now, and running it reproduces both files byte for byte.
+
+`icons/icon.svg` is still the source of record. `icons/maskable.svg` is the same mark
+scaled into Android's safe zone, since the circular mask crops the corners. The PNGs
+are rasterised from those two with `cairosvg` and flattened to opaque RGB, because iOS
+composites black behind any transparency. Rasterise rather than screenshot a browser:
+a headless capture silently left the bottom of the canvas unpainted.
+
+The set is `apple-touch-icon.png` (180, for iOS), `icon-192.png` and `icon-512.png`
+(the manifest), `icon-maskable-512.png` (Android adaptive), and `favicon-32.png` and
+`favicon-16.png` for browsers that will not take an SVG favicon.
 
 ## Run it locally
 
