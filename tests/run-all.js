@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 const suites = fs.readdirSync(__dirname)
-  .filter(f => f.endsWith('.js') && f !== 'run-all.js')
+  .filter(f => f.endsWith('.js') && f !== 'run-all.js' && f !== 'harness.js')
   .sort();
 
 let failed = 0;

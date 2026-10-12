@@ -1,24 +1,6 @@
 // Personal best is tracked and labelled per difficulty level.
-const fs = require('fs');
-const path = require('path');
-const ROOT = path.join(__dirname, '..') + '/';
-const words  = fs.readFileSync('' + ROOT + 'words.js','utf8');
-const html   = fs.readFileSync('' + ROOT + 'index.html','utf8');
-const script = html.match(/<script>\n([\s\S]*?)<\/script>/)[1];
-
-function harness(store) {
-  const els = {};
-  const makeEl = id => { const set=new Set(); return { id, textContent:'', innerHTML:'', disabled:false, className:'', hidden:false,
-    classList:{add:c=>set.add(c),remove:c=>set.delete(c),contains:c=>set.has(c),toggle:(c,on)=>{on?set.add(c):set.delete(c);}},
-    attrs:{}, setAttribute(k,v){this.attrs[k]=v;}, getAttribute(k){return this.attrs[k];},
-    handlers:{}, addEventListener(e,f){this.handlers[e]=f;}, focus(){} }; };
-  const document={getElementById:id=>(els[id]=els[id]||makeEl(id)),addEventListener:()=>{}};
-  const localStorage={getItem:k=>k in store?store[k]:null,setItem:(k,v)=>{store[k]=v;}};
-  function Audio(){ this.play=()=>({catch(){}}); this.pause=()=>{}; this.currentTime=0; this.preload=''; }
-  new Function('document','localStorage','window','navigator','Audio',words+'\n'+script)
-    (document, localStorage, {scrollTo(){},prompt(){}}, {}, Audio);
-  return els;
-}
+const { boot } = require('./harness');
+const harness = store => boot({ store }).els;
 const ok=(c,m)=>{ if(!c) throw new Error('FAIL: '+m); };
 const playGame = (els, answerReal) => {
   els['btn-start'].handlers.click();
@@ -39,7 +21,7 @@ ok(els['best-line'].textContent === '', 'a new player should see no best, got: '
 // --- a score at Tricky is recorded and labelled ---
 els['lvl-2'].handlers.click();
 const scored2 = playGame(els, true);
-ok(JSON.parse(store['fauxcabulary.bests'])['2'] === scored2, 'the Tricky score should be stored under level 2');
+ok(JSON.parse(store['fauxcabulary:bests'])['2'] === scored2, 'the Tricky score should be stored under the prefixed key, level 2');
 const expect2 = 'Personal best at Tricky — ' + scored2 + '/10';
 ok(els['best-line'].textContent === expect2, 'expected "'+expect2+'", got "'+els['best-line'].textContent+'"');
 ok(els['best-line-2'].textContent === expect2, 'the results screen should show it too');
@@ -53,13 +35,13 @@ ok(els['best-line'].textContent === expect2, 'returning to Tricky should show it
 // --- a worse score at the same level does not overwrite ---
 els['lvl-2'].handlers.click();
 const again = playGame(els, false);
-const kept = JSON.parse(store['fauxcabulary.bests'])['2'];
+const kept = JSON.parse(store['fauxcabulary:bests'])['2'];
 ok(kept === Math.max(scored2, again), 'the best should be the higher of the two: ' + kept);
 
 // --- each level keeps its own record ---
 els['lvl-3'].handlers.click();
 const scored3 = playGame(els, true);
-const bests = JSON.parse(store['fauxcabulary.bests']);
+const bests = JSON.parse(store['fauxcabulary:bests']);
 ok(bests['3'] === scored3 && bests['2'] === kept, 'levels should not overwrite each other: ' + JSON.stringify(bests));
 ok(els['best-line'].textContent === 'Personal best at Fiendish — ' + scored3 + '/10', 'Fiendish should be labelled');
 
@@ -67,5 +49,21 @@ ok(els['best-line'].textContent === 'Personal best at Fiendish — ' + scored3 +
 els = harness({ 'fauxcabulary.best': '9' });
 ok(els['best-line'].textContent === 'Earlier best 9/10',
    'a legacy best should show unlabelled, got: ' + els['best-line'].textContent);
+
+// --- keys saved under the old unprefixed names move to the shozbot-wide prefix ---
+store = { 'fauxcabulary.bests': '{"2":8}', 'fauxcabulary.level': '3', 'fauxcabulary.voice': '"lily"', 'fauxcabulary.seen': '["aglet"]' };
+els = harness(store);
+ok(store['fauxcabulary:bests'] === '{"2":8}' && store['fauxcabulary:level'] === '3' && store['fauxcabulary:voice'] === '"lily"' && JSON.parse(store['fauxcabulary:seen'])[0] === 'aglet',
+   'old keys should be copied to the prefixed names: ' + JSON.stringify(store));
+ok(!('fauxcabulary.bests' in store) && !('fauxcabulary.level' in store), 'old keys should be removed once moved');
+ok(els['lvl-3'].getAttribute('aria-pressed') === 'true', 'the migrated level should be the one selected');
+ok(els['voice-lily'].getAttribute('aria-pressed') === 'true', 'the migrated voice should be the one selected');
+els['lvl-2'].handlers.click();
+ok(els['best-line'].textContent === 'Personal best at Tricky — 8/10', 'the migrated best should show, got: ' + els['best-line'].textContent);
+
+// --- but a prefixed key already there wins over a stale old one ---
+store = { 'fauxcabulary.bests': '{"2":8}', 'fauxcabulary:bests': '{"2":9}' };
+els = harness(store);
+ok(store['fauxcabulary:bests'] === '{"2":9}', 'an existing prefixed key must not be overwritten by the old one');
 
 console.log('all personal-best checks passed');

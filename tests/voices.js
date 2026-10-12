@@ -1,25 +1,14 @@
 // The voice chips must pick the voice, preview it, and re-point the clip mid-game.
-const fs = require('fs');
-const path = require('path');
-const ROOT = path.join(__dirname, '..') + '/';
-const words  = fs.readFileSync('' + ROOT + 'words.js','utf8');
-const html   = fs.readFileSync('' + ROOT + 'index.html','utf8');
-const script = html.match(/<script>\n([\s\S]*?)<\/script>/)[1];
-
-function makeEl(id){ const set=new Set(); return { id, textContent:'', innerHTML:'', disabled:false, className:'', hidden:false,
-  classList:{add:c=>set.add(c),remove:c=>set.delete(c),contains:c=>set.has(c),toggle:(c,on)=>{on?set.add(c):set.delete(c);}},
-  attrs:{}, setAttribute(k,v){this.attrs[k]=v;}, getAttribute(k){return this.attrs[k];},
-  handlers:{}, addEventListener(e,f){this.handlers[e]=f;}, focus(){} }; }
-const els={}; const document={getElementById:id=>(els[id]=els[id]||makeEl(id)),addEventListener:()=>{}};
-const store={}; const localStorage={getItem:k=>k in store?store[k]:null,setItem:(k,v)=>{store[k]=v;}};
+const { boot } = require('./harness');
 
 // a fake Audio that records what the page asked for
 const made = [];
 function Audio(src){ made.push(src); this.src=src; this.preload=''; this.currentTime=0;
   this.play=function(){ this.played=true; return {catch(){}}; }; this.pause=function(){}; }
 
-new Function('document','localStorage','window','navigator','Audio',words+'\n'+script)
-  (document, localStorage, {scrollTo(){},prompt(){}}, {}, Audio);
+// Opened on the random-puzzles options, where no word is on screen yet. (Today's
+// daily opens straight into its first word, and preloads that word's clip.)
+const { els, store } = boot({ Audio, search: '?practice' });
 
 const ok=(c,m)=>{ if(!c) throw new Error('FAIL: '+m); };
 const NAMES=['emma','isabella','alice','lily'];
@@ -36,7 +25,7 @@ NAMES.forEach(v => {
   NAMES.filter(o=>o!==v).forEach(o =>
     ok(els['voice-'+o].getAttribute('aria-pressed')==='false', 'only one voice may be selected'));
   ok(made.some(s => s === 'audio/'+v+'/petrichor.mp3'), v+' should preview a word: got '+JSON.stringify(made));
-  ok(JSON.parse(store['fauxcabulary.voice'])===v, v+' should be remembered');
+  ok(JSON.parse(store['fauxcabulary:voice'])===v, v+' should be remembered');
 });
 
 // in play, the clip for the word on screen comes from the chosen voice
