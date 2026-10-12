@@ -106,6 +106,26 @@
   .wordmark .faux { color: var(--accent); }
   .tagline { color: var(--muted); font-size: 0.95rem; margin-top: 6px; }
 
+  /* ---------- the daily line ----------
+     Which puzzle this is, and the two other places to go. One row where it
+     fits, two on a narrow phone; it sits tight under the masthead so the
+     play area keeps its place on a short screen. */
+  .daily {
+    margin-top: -6px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: baseline;
+    gap: 2px 16px;
+    font-size: 0.9rem;
+    color: var(--muted);
+    text-align: center;
+  }
+  .daily b { color: var(--ink); font-weight: 700; }
+  .daily-links { display: flex; gap: 16px; }
+  .daily-links a { color: var(--accent); font-weight: 600; text-decoration: none; padding: 4px 0; }
+  .daily-links a:hover, .daily-links a:focus-visible { text-decoration: underline; }
+
   /* ---------- card ---------- */
   .card {
     background: var(--surface);
@@ -364,7 +384,68 @@
   .recap .t.right { color: var(--genuine); background: var(--genuine-soft); }
   .recap .t.wrong { color: var(--fabricated); background: var(--fabricated-soft); }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .row button { padding-left: 8px; padding-right: 8px; font-size: 1rem; }
   .best { font-size: 0.85rem; font-weight: 600; color: var(--muted); text-align: center; }
+  .best:empty { display: none; }   /* no stray gap when there is no best to show */
+
+  /* The daily's own lines on the results screen: the streak as a pill in the
+     accent, the saved note in quiet type, and a quiet button for replaying. */
+  .outcome { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .outcome .blurb { margin: 0; }
+  .streak {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    padding: 7px 16px;
+    border-radius: 999px;
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .saved { margin: 0; text-align: center; font-size: 0.9rem; color: var(--muted); }
+  .saved.good { color: var(--genuine); font-weight: 600; }
+  .quiet { background: none; border-color: transparent; color: var(--muted); min-height: 48px; font-size: 0.95rem; }
+  .quiet:hover { border-color: var(--rule); color: var(--ink); }
+
+  /* ---------- past puzzles ---------- */
+  .lead { margin: 0; color: var(--ink-soft); }
+  .days { list-style: none; margin: 0; padding: 0; }
+  .days li { border-top: 1px solid var(--rule); }
+  .days li:last-child { border-bottom: 1px solid var(--rule); }
+  .days a {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 2px;
+    color: inherit; text-decoration: none;
+    font-variant-numeric: tabular-nums;
+    border-radius: 8px;
+  }
+  .days a:hover { background: var(--surface-sunk); }
+  .days .n { font-weight: 700; flex: none; width: 4.4em; }
+  .days .d { color: var(--ink-soft); }
+  .days a.today .d { color: var(--accent); font-weight: 700; }
+  .days .s { margin-left: auto; flex: none; font-size: 0.85rem; font-weight: 600; color: var(--muted); }
+  .days .s.done { color: var(--genuine); }
+
+  /* ---------- how to play ----------
+     The rules used to open the start screen. The daily opens straight into
+     the words, so they live below the play area now, a tap away on every screen. */
+  .howto {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 18px;
+    padding: 14px 22px;
+  }
+  .howto summary {
+    cursor: pointer;
+    font-weight: 700;
+    list-style: none;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .howto summary::-webkit-details-marker { display: none; }
+  .howto summary::after { content: "+"; color: var(--accent); font-weight: 700; font-size: 1.2rem; }
+  .howto[open] summary::after { content: "\2212"; }
+  .howto[open] summary { margin-bottom: 14px; }
+  .howto .rules { margin-bottom: 14px; }
+  .howto p { margin: 0; color: var(--ink-soft); font-size: 1rem; }
 
   .levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .levels button { min-height: 48px; font-size: 0.95rem; }
@@ -414,13 +495,19 @@
     <p class="tagline">Ten words. Some of them are fake.</p>
   </header>
 
-  <!-- ===== START ===== -->
-  <section id="start" class="card">
-    <ol class="rules">
-      <li>You get ten obscure words, each with a definition.</li>
-      <li>Some of the words are <strong>real</strong>. The rest are <strong>made up</strong>. How many of each changes every game, so counting won't help you.</li>
-      <li>Decide on each word. One point for every one you get right.</li>
-    </ol>
+  <!-- ===== THE DAILY LINE =====
+       Which puzzle is showing, and links to the other two places to go. -->
+  <div class="daily" id="daily">
+    <span id="daily-text"></span>
+    <nav class="daily-links" aria-label="Where to go next">
+      <a href="./" id="go-today" class="hidden">Today&rsquo;s puzzle</a>
+      <a href="?past" id="go-past">Past puzzles</a>
+      <a href="?practice" id="go-random">Random puzzles</a>
+    </nav>
+  </div>
+
+  <!-- ===== START (random puzzles) ===== -->
+  <section id="start" class="card hidden">
     <div class="levels" role="group" aria-label="Difficulty">
       <button class="level" id="lvl-1" data-level="1">Easy</button>
       <button class="level" id="lvl-2" data-level="2">Tricky</button>
@@ -500,30 +587,66 @@
       <div class="score"><span id="final"></span><span class="of">/10</span></div>
       <div class="rank" id="rank"></div>
     </div>
-    <p class="blurb" id="blurb"></p>
+    <div class="outcome">
+      <p class="blurb" id="blurb"></p>
+      <p class="streak hidden" id="streak"></p>
+      <p class="saved hidden" id="saved"></p>
+    </div>
     <p class="split" id="split"></p>
     <ul class="recap" id="recap"></ul>
+    <button id="btn-again" class="primary">Play random puzzles</button>
     <div class="row">
-      <button id="btn-again" class="primary">Play again</button>
-      <button id="btn-share">Copy result</button>
+      <button id="btn-share">Share</button>
+      <button id="btn-past">Past puzzles</button>
     </div>
+    <button id="btn-replay" class="quiet">Play it again</button>
     <div id="best-line-2" class="best"></div>
   </section>
+
+  <!-- ===== PAST PUZZLES ===== -->
+  <section id="past" class="card hidden">
+    <p class="lead">Each day has its own ten words, numbered by the day of the year. Your first score is kept beside any day you have played. Tap a day to play it.</p>
+    <ul class="days" id="past-list"></ul>
+  </section>
+
+  <!-- ===== HOW TO PLAY ===== -->
+  <details class="howto" id="howto">
+    <summary>How to play</summary>
+    <ol class="rules">
+      <li>You get ten obscure words, each with a definition.</li>
+      <li>Some of the words are <strong>real</strong>. The rest are <strong>made up</strong>. How many of each changes every game, so counting won't help you.</li>
+      <li>Decide on each word. One point for every one you get right.</li>
+    </ol>
+    <p>There is one <strong>daily puzzle</strong>: ten words a day, the same for everyone, drawn from all three levels. Your first score for a day is the one that is kept, though you can play it again as often as you like, and playing on consecutive days builds a streak. <strong>Random puzzles</strong> are unlimited, and that is where you choose a level.</p>
+  </details>
 
   <footer>For people who suspect the dictionary is bluffing</footer>
 </div>
 
 <script src="words.js"></script>
+<!-- The shared daily-puzzle logic every Shozbot game carries: the day's number and
+     seed, the saved record with the first score kept, the streak, the share text.
+     A copy of shozbot.com/kit/daily.js; change it there, then copy it here. -->
+<script src="shozbot-daily.js"></script>
 <script>
 (function () {
   "use strict";
 
   var ROUND_LEN = 10;   // words per game
-  var STORE_BESTS = "fauxcabulary.bests";        // { level: score }
-  var STORE_BEST_LEGACY = "fauxcabulary.best";   // a single score, from before levels existed
-  var STORE_LEVEL = "fauxcabulary.level";
-  var STORE_VOICE = "fauxcabulary.voice";
-  var STORE_SEEN = "fauxcabulary.seen";
+  // Every app shares the shozbot.com origin now, so every key carries the game's
+  // name, in the shape the studio uses: `fauxcabulary:` and then the key.
+  var PREFIX = "fauxcabulary:";
+  var STORE_BESTS = PREFIX + "bests";        // { level: score } — the Random mode's bests
+  var STORE_BEST_LEGACY = PREFIX + "best";   // a single score, from before levels existed
+  var STORE_LEVEL = PREFIX + "level";
+  var STORE_VOICE = PREFIX + "voice";
+  var STORE_SEEN = PREFIX + "seen";
+  // The same keys as they were before the prefix, moved across once on load so
+  // nobody loses a best. Old keys that belong to nothing are deleted.
+  var OLD_KEYS = {
+    "fauxcabulary.bests": STORE_BESTS, "fauxcabulary.best": STORE_BEST_LEGACY,
+    "fauxcabulary.level": STORE_LEVEL, "fauxcabulary.voice": STORE_VOICE, "fauxcabulary.seen": STORE_SEEN
+  };
 
   var LEVELS = {
     1: { name: "Easy",     note: "Words you have probably met, and fakes that give themselves away." },
@@ -532,6 +655,11 @@
   };
 
   var el = function (id) { return document.getElementById(id); };
+  // The shared daily-puzzle logic: the day's number and seed, the saved record,
+  // the streak, the standard wording and the share text. See shozbot-daily.js.
+  var daily = window.ShozDaily.create({ game: "fauxcabulary", title: "Fauxcabulary" });
+  var meta = null;    // the puzzle on screen: a daily (with its date and seed) or a practice run
+  var current = null; // the results on screen, for Share and Play it again
   var level = 2;
   var deck = [];      // the ten words for this game
   var index = 0;      // how far the game has progressed
@@ -549,6 +677,19 @@
   }
   function write(key, value) {
     try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* ignore */ }
+  }
+  function migrateKeys() {
+    Object.keys(OLD_KEYS).forEach(function (old) {
+      try {
+        var v = localStorage.getItem(old);
+        if (v === null) return;
+        if (localStorage.getItem(OLD_KEYS[old]) === null) localStorage.setItem(OLD_KEYS[old], v);
+        localStorage.removeItem(old);
+      } catch (e) { /* ignore */ }
+    });
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; });
   }
 
   /* ---------- building the deck ---------- */
@@ -582,9 +723,9 @@
 
   // Every word flips its own coin, so the real/fake count is genuinely random —
   // there is no split to count down against. Both pools are capped by their size.
-  function realCountForRound(realsAvailable, fakesAvailable) {
+  function realCountForRound(realsAvailable, fakesAvailable, random) {
     var n = 0;
-    for (var i = 0; i < ROUND_LEN; i++) if (Math.random() < 0.5) n++;
+    for (var i = 0; i < ROUND_LEN; i++) if ((random || Math.random)() < 0.5) n++;
     return Math.min(Math.max(n, ROUND_LEN - fakesAvailable), realsAvailable);
   }
 
@@ -592,6 +733,7 @@
     return pool.filter(function (x) { return x.lvl === level; });
   }
 
+  // A random deck: the chosen level's pool, avoiding words seen recently.
   function buildDeck() {
     var seen = read(STORE_SEEN, []);
     var realPool = atLevel(REAL_WORDS);
@@ -602,6 +744,31 @@
     var picked = shuffle(reals.concat(fakes));
     write(STORE_SEEN, seen.concat(picked.map(function (x) { return x.w; })));
     return picked;
+  }
+
+  // The day's deck: the same ten for everyone, drawn with the day's seed from all
+  // three levels mixed, so a regular is not stuck on the easy pool. The real/fake
+  // coin is the same rule as a random deck, flipped with the seeded generator.
+  function dailyDeck(m) {
+    var random = daily.rng(m.seed);
+    var realCount = realCountForRound(REAL_WORDS.length, FAKE_WORDS.length, random);
+    var reals = daily.shuffle(REAL_WORDS, random).slice(0, realCount).map(function (x) { return tag(x, true); });
+    var fakes = daily.shuffle(FAKE_WORDS, random).slice(0, ROUND_LEN - realCount).map(function (x) { return tag(x, false); });
+    var picked = daily.shuffle(reals.concat(fakes), random);
+    // Count them as seen, so a random game straight after does not deal them again.
+    var seen = read(STORE_SEEN, []);
+    var fresh = picked.map(function (x) { return x.w; }).filter(function (w) { return seen.indexOf(w) === -1; });
+    if (fresh.length) write(STORE_SEEN, seen.concat(fresh));
+    return picked;
+  }
+
+  // Find a word in the bank by name, with which side it came from. Used to
+  // redraw a saved day's recap, so a day stays readable even if the bank
+  // changes under it.
+  function lookup(w) {
+    for (var i = 0; i < REAL_WORDS.length; i++) if (REAL_WORDS[i].w === w) return tag(REAL_WORDS[i], true);
+    for (var j = 0; j < FAKE_WORDS.length; j++) if (FAKE_WORDS[j].w === w) return tag(FAKE_WORDS[j], false);
+    return null;
   }
 
   /* ---------- saying the word out loud ---------- */
@@ -736,9 +903,28 @@
 
   /* ---------- screens ---------- */
   function show(name) {
-    ["start", "game", "results"].forEach(function (id) {
+    ["start", "game", "results", "past"].forEach(function (id) {
       el(id).classList.toggle("hidden", id !== name);
     });
+  }
+
+  // The address follows the screen, so a day can be linked and a reload lands
+  // back where it was: ?daily=2026-10-12, ?past, ?practice.
+  function setUrl(q) {
+    try { history.replaceState(null, "", q); } catch (e) { /* file:// and the like */ }
+  }
+
+  // The line under the masthead: what is showing, and the two other places to go.
+  function setDailyLine(text, links) {
+    el("daily-text").innerHTML = text;
+    ["today", "past", "random"].forEach(function (k) {
+      el("go-" + k).classList.toggle("hidden", links.indexOf(k) === -1);
+    });
+  }
+  function lineFor(m) {
+    return m && m.mode === "daily"
+      ? "<b>Daily No. " + m.number + "</b> · " + esc(daily.fmtShort(m.date))
+      : "<b>Random puzzles</b>";
   }
 
   function setLevel(n) {
@@ -751,6 +937,9 @@
     renderBest();
   }
 
+  // The personal bests belong to the Random mode: they are per level, and a
+  // daily mixes the levels. So the line shows on the start screen and after a
+  // random game, never after a daily.
   function renderBest() {
     var bests = read(STORE_BESTS, {});
     var best = bests[level];
@@ -764,7 +953,7 @@
       text = legacy === null ? "" : "Earlier best " + legacy + "/10";
     }
     el("best-line").textContent = text;
-    el("best-line-2").textContent = text;
+    el("best-line-2").textContent = (current && current.meta && current.meta.mode === "daily") ? "" : text;
   }
 
   function renderProgress() {
@@ -777,7 +966,7 @@
       html += '<span class="' + cls + '"></span>';
     }
     el("track").innerHTML = html;
-    el("counter").textContent = "Word " + (view + 1) + " of " + ROUND_LEN + (view < index ? " \u00b7 reviewing" : "");
+    el("counter").textContent = "Word " + (view + 1) + " of " + ROUND_LEN + (view < index ? " · reviewing" : "");
     el("tally").textContent = score + " correct";
   }
 
@@ -860,34 +1049,78 @@
   ];
 
   function finish() {
-    var bests = read(STORE_BESTS, {});
-    if (bests[level] === undefined || score > bests[level]) {
-      bests[level] = score;
-      write(STORE_BESTS, bests);
+    var results = log.map(function (r) { return r.correct ? 1 : 0; });
+    var first = false;
+    if (meta && meta.mode === "daily") {
+      // The first finished score for a day is the one that is kept; a replay
+      // shows its own score but leaves the record alone.
+      first = daily.save(meta, {
+        score: score, max: ROUND_LEN, results: results,
+        recap: log.map(function (r) { return [r.w, r.correct ? 1 : 0]; })
+      }).first;
+    } else {
+      var bests = read(STORE_BESTS, {});
+      if (bests[level] === undefined || score > bests[level]) {
+        bests[level] = score;
+        write(STORE_BESTS, bests);
+      }
     }
+    showResults({
+      meta: meta, score: score, max: ROUND_LEN, results: results, first: first,
+      rows: log.map(function (r, i) { return { w: r.w, real: r.real, guess: r.guess, correct: r.correct, card: deck[i] }; })
+    });
+  }
 
-    var rank = RANKS.filter(function (r) { return score >= r.min; })[0];
-    var reals = log.filter(function (r) { return r.real; }).length;
+  // A day already played opens on its kept score. The recap is redrawn from the
+  // words the record names, looked up in the bank, so it does not depend on the
+  // day's deck being drawn the same way again.
+  function showSaved(m, r) {
+    var rows = (r.recap || []).map(function (pair) {
+      var card = lookup(pair[0]), correct = pair[1] === 1;
+      return { w: pair[0], real: card ? card.real : null, correct: correct,
+               guess: card ? (correct ? card.real : !card.real) : null, card: card };
+    });
+    showResults({ meta: m, score: r.score, max: r.max === null || r.max === undefined ? ROUND_LEN : r.max,
+                  results: r.results || [], first: false, rows: rows });
+  }
 
-    el("final").textContent = score;
+  function showResults(res) {
+    var m = res.meta, isDaily = !!(m && m.mode === "daily");
+    current = res;
+    meta = m;
+    var rank = RANKS.filter(function (r) { return res.score >= r.min; })[0];
+    var known = res.rows.filter(function (r) { return r.real !== null; });
+    var reals = known.filter(function (r) { return r.real; }).length;
+
+    el("final").textContent = res.score;
     el("rank").textContent = rank.title;
     el("blurb").textContent = rank.blurb;
-    el("split").textContent = LEVELS[level].name + " — this round held " + reals + " real " +
-                              (reals === 1 ? "word" : "words") + " and " + (ROUND_LEN - reals) + " fake.";
 
-    el("recap").innerHTML = log.map(function (r, i) {
-      var card = deck[i];
+    // The daily's lines, in the order every Shozbot game uses: streak, then the saved note.
+    var run = isDaily && m.iso === daily.iso(daily.today()) ? daily.streakLine() : "";
+    el("streak").textContent = run;
+    el("streak").classList.toggle("hidden", !run);
+    el("saved").textContent = isDaily ? daily.savedLine(m, res.first) : "";
+    el("saved").classList.toggle("good", isDaily && res.first);
+    el("saved").classList.toggle("hidden", !isDaily);
+
+    el("split").textContent = (isDaily ? "This round" : LEVELS[level].name + " — this round") + " held " + reals + " real " +
+                              (reals === 1 ? "word" : "words") + " and " + (known.length - reals) + " fake.";
+
+    el("recap").innerHTML = res.rows.map(function (r, i) {
+      var card = r.card;
       return '<li>' +
-        '<button type="button" class="recap-row" id="recap-row-' + i + '" aria-expanded="false" aria-controls="recap-detail-' + i + '">' +
+        '<button type="button" class="recap-row" id="recap-row-' + i + '" aria-expanded="false" aria-controls="recap-detail-' + i + '"' + (card ? '' : ' disabled') + '>' +
           '<span class="mark ' + (r.correct ? "hit" : "miss") + '">' + (r.correct ? "&#10003;" : "&#10007;") + '</span>' +
-          '<span class="w">' + r.w + '</span>' +
-          '<span class="t ' + (r.correct ? "right" : "wrong") + '">' + (r.real ? "real" : "fake") + '</span>' +
-          '<span class="chev" aria-hidden="true">&#9662;</span>' +
+          '<span class="w">' + esc(r.w) + '</span>' +
+          (r.real === null ? '' : '<span class="t ' + (r.correct ? "right" : "wrong") + '">' + (r.real ? "real" : "fake") + '</span>') +
+          (card ? '<span class="chev" aria-hidden="true">&#9662;</span>' : '') +
         '</button>' +
         '<div class="recap-detail hidden" id="recap-detail-' + i + '">' +
+          (card ?
           '<div class="detail-head">' +
             '<span class="pos">' + card.pos + '</span>' +
-            '<button type="button" class="speak" id="recap-speak-' + i + '" aria-label="Hear ' + r.w + '">' +
+            '<button type="button" class="speak" id="recap-speak-' + i + '" aria-label="Hear ' + esc(r.w) + '">' +
               '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
                 '<path d="M4 9.5v5h3.4L12 18.5v-13L7.4 9.5H4z" fill="currentColor" />' +
                 '<path d="M15.8 8.8a4.6 4.6 0 0 1 0 6.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />' +
@@ -898,16 +1131,18 @@
           '<p class="detail-def">' + card.def + '</p>' +
           '<p class="detail-note">' + card.note + '</p>' +
           (card.ex ? '<p class="example">&ldquo;' + card.ex + '&rdquo;</p>' : '') +
-          '<p class="said">You answered ' + (r.guess ? "Real Word" : "Fake Word") + '</p>' +
+          '<p class="said">You answered ' + (r.guess ? "Real Word" : "Fake Word") + '</p>'
+          : '') +
         '</div>' +
       '</li>';
     }).join("");
 
     // One row open at a time keeps the list navigable on a phone.
-    log.forEach(function (r, i) {
+    res.rows.forEach(function (r, i) {
       // State lives in JS, not just in the markup, so a second game starts clean.
       el("recap-row-" + i).setAttribute("aria-expanded", "false");
       el("recap-detail-" + i).classList.add("hidden");
+      if (!r.card) return;
       el("recap-row-" + i).addEventListener("click", function () { toggleDetail(i); });
       el("recap-speak-" + i).addEventListener("click", function (e) {
         e.stopPropagation();
@@ -916,7 +1151,13 @@
     });
     openDetail = -1;
 
+    el("btn-again").textContent = isDaily ? "Play random puzzles" : "Play again";
+    el("btn-replay").textContent = isDaily ? "Play it again" : "Today’s puzzle";
+    el("btn-share").textContent = "Share";
+
     renderBest();
+    setUrl(isDaily ? "?daily=" + m.iso : "?practice");
+    setDailyLine(lineFor(m), isDaily ? ["past", "random"] : ["today", "past"]);
     show("results");
     window.scrollTo(0, 0);
   }
@@ -936,49 +1177,110 @@
     openDetail = opening ? i : -1;
   }
 
+  // The share text is the kit's, so every Shozbot game shares the same way:
+  // "Fauxcabulary No. 285 · Oct 12", the score and a square per word, the address.
   function shareText() {
-    var grid = log.map(function (r) { return r.correct ? "🟩" : "🟥"; }).join("");
-    var text = "Fauxcabulary (" + LEVELS[level].name + ") " + score + "/10\n" + grid +
-               "\nCan you spot the fake words?";
-    // Only worth attaching a link when the page came from somewhere shareable.
-    if (typeof location !== "undefined" && /^https?:$/.test(location.protocol)) {
-      text += "\n" + location.origin + location.pathname;
-    }
-    return text;
+    if (!current) return "";
+    return daily.shareText({ meta: current.meta, score: current.score, max: current.max, results: current.results, perMax: 1 });
   }
 
-  function copyResult() {
+  function shareResult() {
     var text = shareText();
-    var done = function () {
-      el("btn-share").textContent = "Copied";
-      setTimeout(function () { el("btn-share").textContent = "Copy result"; }, 1600);
-    };
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(done, function () { window.prompt("Copy your result:", text); });
-    } else {
-      window.prompt("Copy your result:", text);
-    }
+    daily.share(text, el("btn-share")).then(function (how) {
+      if (how === "failed") window.prompt("Copy your result:", text);
+    });
+  }
+
+  /* ---------- past puzzles ---------- */
+  function showPast() {
+    meta = null;
+    var t = daily.today();
+    el("past-list").innerHTML = daily.pastDays().map(function (m) {
+      var r = m.record;
+      var when = (m.isToday ? "Today, " : "") + daily.fmtTiny(m.date) + (m.date.getFullYear() !== t.getFullYear() ? ", " + m.date.getFullYear() : "");
+      return '<li><a href="?daily=' + m.iso + '" data-daily="' + m.iso + '"' + (m.isToday ? ' class="today"' : '') + '>' +
+        '<span class="n">No. ' + m.number + '</span>' +
+        '<span class="d">' + esc(when) + '</span>' +
+        '<span class="s' + (r ? ' done' : '') + '">' + (r ? r.score + " / " + (r.max === null || r.max === undefined ? ROUND_LEN : r.max) : "Not played") + '</span>' +
+      '</a></li>';
+    }).join("");
+    setUrl("?past");
+    setDailyLine("<b>Past puzzles</b> · the previous " + daily.PAST_DAYS + " days", ["today", "random"]);
+    show("past");
+    window.scrollTo(0, 0);
   }
 
   /* ---------- wiring ---------- */
-  function startGame() {
-    deck = buildDeck();
+  function beginRound() {
     index = 0;
     score = 0;
     log = [];
+    current = null;
     show("game");
     renderAt(0);
   }
 
+  // Today's puzzle, or any day's: results if it has been played, the words if not.
+  function openDate(isoDate) {
+    var d = daily.parseIso(isoDate);
+    if (!d) return openToday();
+    if (d > daily.today()) return showPast();
+    var m = daily.metaFor(d);
+    var r = daily.record(m.iso);
+    if (r) return showSaved(m, r);
+    startDaily(m);
+  }
+  function openToday() { openDate(daily.iso(daily.today())); }
+
+  function startDaily(m) {
+    meta = m;
+    deck = dailyDeck(m);
+    beginRound();
+    setUrl("?daily=" + m.iso);
+    setDailyLine(lineFor(m), ["past", "random"]);
+  }
+
+  // Random puzzles: the options first — level and voice — then Deal me ten.
+  function showStart() {
+    meta = null;
+    current = null;
+    renderBest();
+    setUrl("?practice");
+    setDailyLine(lineFor(null), ["today", "past"]);
+    show("start");
+    window.scrollTo(0, 0);
+  }
+  function startGame() {
+    meta = daily.practiceMeta();
+    deck = buildDeck();
+    beginRound();
+    setUrl("?practice");
+    setDailyLine(lineFor(meta), ["today", "past"]);
+  }
+
   el("btn-start").addEventListener("click", startGame);
-  el("btn-again").addEventListener("click", function () { show("start"); window.scrollTo(0, 0); });
-  el("btn-share").addEventListener("click", copyResult);
+  el("btn-again").addEventListener("click", showStart);
+  el("btn-replay").addEventListener("click", function () {
+    if (current && current.meta && current.meta.mode === "daily") startDaily(current.meta);
+    else openToday();
+  });
+  el("btn-past").addEventListener("click", showPast);
+  el("btn-share").addEventListener("click", shareResult);
   el("btn-real").addEventListener("click", function () { answer(true); });
   el("btn-fake").addEventListener("click", function () { answer(false); });
   el("btn-next").addEventListener("click", next);
   el("btn-speak").addEventListener("click", speakWord);
   el("btn-back").addEventListener("click", function () { if (view > 0) renderAt(view - 1); });
   el("btn-forward").addEventListener("click", function () { if (view < index) renderAt(view + 1); });
+  el("go-today").addEventListener("click", function (e) { e.preventDefault(); openToday(); });
+  el("go-past").addEventListener("click", function (e) { e.preventDefault(); showPast(); });
+  el("go-random").addEventListener("click", function (e) { e.preventDefault(); showStart(); });
+  el("past-list").addEventListener("click", function (e) {
+    var a = e.target && e.target.closest ? e.target.closest("[data-daily]") : null;
+    if (!a) return;
+    e.preventDefault();
+    openDate(a.getAttribute("data-daily"));
+  });
 
   document.addEventListener("keydown", function (e) {
     var playing = !el("game").classList.contains("hidden");
@@ -1004,10 +1306,21 @@
   VOICE_NAMES.forEach(function (v) {
     el("voice-" + v).addEventListener("click", function () { setVoice(v, true); });
   });
+  migrateKeys();
   setVoice(read(STORE_VOICE, "emma"), false);
   setLevel(read(STORE_LEVEL, 2));
   setUpSpeech();
   renderBest();
+
+  // Where to open: a linked day, the past list, random puzzles, or — with no
+  // address at all — today's puzzle.
+  (function route() {
+    var q = new URLSearchParams(location.search);
+    if (q.has("past")) return showPast();
+    if (q.has("practice")) return showStart();
+    if (q.get("daily")) return openDate(q.get("daily"));
+    openToday();
+  })();
 })();
 </script>
 

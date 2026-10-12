@@ -13,7 +13,15 @@ which real word the fake one is impersonating.
 
 ## Features
 
-- 10 words per game with a random real/fake split, freshly shuffled.
+- A **daily puzzle**: ten words a day, the same for everyone, drawn from all three
+  levels with the day's seed. The page opens straight into it (or onto its results
+  once played). The first score for a day is the one that is kept; a day can be
+  replayed. Consecutive days build a streak, the previous 100 days are listed under
+  **Past puzzles**, and **Share** gives `Fauxcabulary No. 285 · Oct 12`, the score,
+  a square per word and the address. The shared logic is `shozbot-daily.js`, a copy
+  of the studio's `kit/daily.js` — change it there and copy it here.
+- **Random puzzles** are the old game: 10 words at a chosen level with a random
+  real/fake split, freshly shuffled, unlimited.
 - Three difficulty levels — Easy, Tricky and Fiendish — each with its own words and
   its own fakes. Your choice is remembered.
 - Instant reveal after each answer — **Correct** or **Wrong**, the word's status, and
@@ -91,7 +99,7 @@ push to `main`. One-time setup: **Settings → Pages → Build and deployment �
 ## Tests and audits
 
 ```sh
-node tests/run-all.js                         # seven suites, drive the real game logic
+node tests/run-all.js                         # eight suites, drive the real game logic
 node tools/audit.js --dict dict.txt --freq freq.txt   # fairness audit of the word bank
 ```
 
