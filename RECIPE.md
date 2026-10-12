@@ -33,7 +33,7 @@ theming, tests, deploy workflow — carries over unchanged.
 | `audio/<voice>/<word>.mp3` | one spoken clip per item per voice |
 | `tools/make-audio.py` | renders the clips with Kokoro |
 | `tools/audit.js` | the fairness audit — run it after adding content |
-| `tests/` | seven suites that drive the real game logic against a DOM stub |
+| `tests/` | eight suites that drive the real game logic against a DOM stub |
 | `.github/workflows/pages.yml` | deploys to GitHub Pages on push to `main` |
 
 An entry looks like this. Real ones carry `ex`; invented ones must not, because the
