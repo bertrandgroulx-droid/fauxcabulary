@@ -12,6 +12,7 @@
 //   now       the date "today" should be: "YYYY-MM-DD", fixed at local noon
 //   Audio     a constructor to stand in for Audio, to see what the page loads
 //   navigator what the page sees as navigator (share, clipboard)
+//   canonical the href of the page's canonical link, for the share icon
 const fs = require('fs');
 const path = require('path');
 const ROOT = path.join(__dirname, '..') + '/';
@@ -33,7 +34,7 @@ function makeEl(id) {
       add: c => set.add(c), remove: c => set.delete(c), contains: c => set.has(c),
       toggle: (c, on) => { on ? set.add(c) : set.delete(c); }
     },
-    attrs: {}, setAttribute(k, v) { this.attrs[k] = v; }, getAttribute(k) { return this.attrs[k]; },
+    attrs: {}, setAttribute(k, v) { this.attrs[k] = v; }, getAttribute(k) { return this.attrs[k]; }, removeAttribute(k) { delete this.attrs[k]; },
     handlers: {}, addEventListener(ev, fn) { this.handlers[ev] = fn; }, focus() {}
   };
 }
@@ -45,6 +46,9 @@ function boot(opts) {
   const docHandlers = {};
   const document = {
     getElementById: id => (els[id] = els[id] || makeEl(id)),
+    // The one thing the page looks up by selector: its canonical link, which
+    // the share icon builds the address from.
+    querySelector: sel => (sel === 'link[rel="canonical"]' ? { href: opts.canonical || 'https://shozbot.com/fauxcabulary/' } : null),
     addEventListener: (ev, fn) => { docHandlers[ev] = fn; }
   };
   const localStorage = {

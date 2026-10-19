@@ -122,9 +122,56 @@
     text-align: center;
   }
   .daily b { color: var(--ink); font-weight: 700; }
-  .daily-links { display: flex; gap: 16px; }
+  .daily-links { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 0 14px; }
   .daily-links a { color: var(--accent); font-weight: 600; text-decoration: none; padding: 4px 0; }
   .daily-links a:hover, .daily-links a:focus-visible { text-decoration: underline; }
+  .daily-help { display: flex; align-items: center; gap: 8px; }
+
+  /* The share icon: the same upload-arrow glyph every Shozbot app carries, in
+     the muted text colour, to the left of How to play. A 34px round hit area
+     with the glyph 18px inside; the negative margin keeps the icon from making
+     the daily line any taller than its words. */
+  .share-btn {
+    flex: none;
+    width: 34px;
+    height: 34px;
+    min-height: 0;
+    margin: -6px -4px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    display: grid;
+    place-items: center;
+    color: var(--muted);
+    transition: color .15s ease, background .15s ease;
+  }
+  .share-btn svg { width: 18px; height: 18px; display: block; }
+  .share-btn:hover, .share-btn:focus-visible { color: var(--ink); background: var(--surface-sunk); }
+
+  /* "Link copied", or the link itself where nothing can copy it: a pill at the
+     foot of the screen for a moment, in the ink on the page colour. */
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%);
+    max-width: calc(100% - 32px);
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--ground);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: center;
+    overflow-wrap: anywhere;
+    box-shadow: var(--shadow);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .15s ease;
+    z-index: 10;
+  }
+  .toast.show { opacity: 1; }
 
   /* ---------- card ---------- */
   .card {
@@ -426,26 +473,29 @@
   .days .s.done { color: var(--genuine); }
 
   /* ---------- how to play ----------
-     The rules used to open the start screen. The daily opens straight into
-     the words, so they live below the play area now, a tap away on every screen. */
-  .howto {
+     The rules used to open the start screen, then sat in a fold-out under the
+     cards. They are a card over the page now, reached from How to play in the
+     daily line, the way Acronumbskull does it, so the two siblings match. */
+  .help {
+    width: min(100% - 32px, 32rem);
+    /* taller than a small phone screen: scroll inside rather than lose the top */
+    max-height: calc(100dvh - 32px);
+    overflow: auto;
+    overscroll-behavior: contain;
+    margin: auto;
+    padding: 22px;
     background: var(--surface);
+    color: var(--ink);
     border: 1px solid var(--rule);
     border-radius: 18px;
-    padding: 14px 22px;
+    box-shadow: var(--shadow);
   }
-  .howto summary {
-    cursor: pointer;
-    font-weight: 700;
-    list-style: none;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .howto summary::-webkit-details-marker { display: none; }
-  .howto summary::after { content: "+"; color: var(--accent); font-weight: 700; font-size: 1.2rem; }
-  .howto[open] summary::after { content: "\2212"; }
-  .howto[open] summary { margin-bottom: 14px; }
-  .howto .rules { margin-bottom: 14px; }
-  .howto p { margin: 0; color: var(--ink-soft); font-size: 1rem; }
+  .help::backdrop { background: rgba(18, 20, 28, .45); }
+  .help h2 { margin: 0 0 16px; font-size: 1.3rem; letter-spacing: -0.02em; }
+  .help .rules { font-size: 1rem; gap: 8px; }
+  .help .daily-how { margin: 18px 0 0; color: var(--ink-soft); font-size: 1rem; }
+  .help .daily-how strong { color: var(--ink); }
+  .help .primary { margin-top: 20px; }
 
   .levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .levels button { min-height: 48px; font-size: 0.95rem; }
@@ -503,6 +553,17 @@
       <a href="./" id="go-today" class="hidden">Today&rsquo;s puzzle</a>
       <a href="?past" id="go-past">Past puzzles</a>
       <a href="?practice" id="go-random">Random puzzles</a>
+      <!-- The share icon and How to play wrap as one unit, so the icon is always
+           immediately left of the words on the same row. -->
+      <span class="daily-help">
+        <button class="share-btn" id="btn-share-link" type="button" aria-label="Share a link to this puzzle" title="Share a link to this puzzle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3v12M8 7l4-4 4 4"/><path d="M6 11H5v9h14v-9h-1"/>
+          </svg>
+        </button>
+        <a href="#how-to-play" id="go-help">How to play</a>
+      </span>
     </nav>
   </div>
 
@@ -610,18 +671,21 @@
   </section>
 
   <!-- ===== HOW TO PLAY ===== -->
-  <details class="howto" id="howto">
-    <summary>How to play</summary>
+  <dialog class="help" id="help" aria-labelledby="help-title">
+    <h2 id="help-title">How to play</h2>
     <ol class="rules">
       <li>You get ten obscure words, each with a definition.</li>
       <li>Some of the words are <strong>real</strong>. The rest are <strong>made up</strong>. How many of each changes every game, so counting won't help you.</li>
       <li>Decide on each word. One point for every one you get right.</li>
     </ol>
-    <p>There is one <strong>daily puzzle</strong>: ten words a day, the same for everyone, drawn from all three levels. Your first score for a day is the one that is kept, though you can play it again as often as you like, and playing on consecutive days builds a streak. <strong>Random puzzles</strong> are unlimited, and that is where you choose a level.</p>
-  </details>
+    <p class="daily-how">There is one <strong>daily puzzle</strong>: ten words a day, the same for everyone, drawn from all three levels. Your first score for a day is the one that is kept, though you can play it again as often as you like, and playing on consecutive days builds a streak. <strong>Random puzzles</strong> are unlimited, and that is where you choose a level.</p>
+    <button class="primary" id="btn-help-close">Got it</button>
+  </dialog>
 
   <footer>For people who suspect the dictionary is bluffing</footer>
 </div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="words.js"></script>
 <!-- The shared daily-puzzle logic every Shozbot game carries: the day's number and
@@ -1191,6 +1255,62 @@
     });
   }
 
+  /* ---------- a link to this puzzle ----------
+     The icon in the daily line. While a specific day's deck is on screen — in
+     play or on its results — the link carries the date, so it opens the same
+     ten tomorrow; a random puzzle and the Past puzzles list share the plain
+     address. Built from the page's canonical link, never location.href: this
+     file is also served from the old github.io address, and saved progress
+     lives per address. */
+  var canonical = document.querySelector ? document.querySelector('link[rel="canonical"]') : null;
+  var HOME = (canonical && canonical.href) || "https://shozbot.com/fauxcabulary/";
+
+  function shareLink() {
+    if (meta && meta.mode === "daily") {
+      return { url: HOME + "?daily=" + meta.iso, title: "Fauxcabulary \u00b7 Daily No. " + meta.number };
+    }
+    return { url: HOME, title: "Fauxcabulary" };
+  }
+
+  var toastTimer = null;
+  function toast(text) {
+    var t = el("toast");
+    t.textContent = text;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove("show"); }, 1800);
+  }
+
+  // A phone opens its share sheet; a laptop copies the link and says so; where
+  // neither is possible the toast shows the link itself.
+  function shareThisPuzzle() {
+    var link = shareLink();
+    var nav = (typeof navigator !== "undefined" && navigator) || {};
+    if (typeof nav.share === "function") {
+      try { var sharing = nav.share({ title: link.title, url: link.url }); if (sharing && sharing.catch) sharing.catch(function () {}); } catch (e) { /* declined */ }
+      return;
+    }
+    if (nav.clipboard && typeof nav.clipboard.writeText === "function") {
+      nav.clipboard.writeText(link.url).then(function () { toast("Link copied"); }, function () { toast(link.url); });
+      return;
+    }
+    toast(link.url);
+  }
+
+  /* ---------- how to play ---------- */
+  function showHelp() {
+    var d = el("help");
+    if (typeof d.showModal === "function") { if (!d.open) d.showModal(); }
+    else d.setAttribute("open", "");
+    // Opening focuses the Got it button, which the browser scrolls into view —
+    // on a small phone that lands a first-time reader at the bottom of the rules.
+    d.scrollTop = 0;
+  }
+  function closeHelp() {
+    var d = el("help");
+    if (typeof d.close === "function") d.close(); else d.removeAttribute("open");
+  }
+
   /* ---------- past puzzles ---------- */
   function showPast() {
     meta = null;
@@ -1275,6 +1395,9 @@
   el("go-today").addEventListener("click", function (e) { e.preventDefault(); openToday(); });
   el("go-past").addEventListener("click", function (e) { e.preventDefault(); showPast(); });
   el("go-random").addEventListener("click", function (e) { e.preventDefault(); showStart(); });
+  el("go-help").addEventListener("click", function (e) { e.preventDefault(); showHelp(); });
+  el("btn-help-close").addEventListener("click", closeHelp);
+  el("btn-share-link").addEventListener("click", shareThisPuzzle);
   el("past-list").addEventListener("click", function (e) {
     var a = e.target && e.target.closest ? e.target.closest("[data-daily]") : null;
     if (!a) return;
@@ -1283,6 +1406,7 @@
   });
 
   document.addEventListener("keydown", function (e) {
+    if (el("help").open) return;   // the rules are up: keys belong to the dialog
     var playing = !el("game").classList.contains("hidden");
     if (!playing) {
       if (e.key === "Enter" && !el("start").classList.contains("hidden")) startGame();

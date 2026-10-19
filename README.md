@@ -20,6 +20,15 @@ which real word the fake one is impersonating.
   **Past puzzles**, and **Share** gives `Fauxcabulary No. 285 · Oct 12`, the score,
   a square per word and the address. The shared logic is `shozbot-daily.js`, a copy
   of the studio's `kit/daily.js` — change it there and copy it here.
+- A **share icon** in the daily line, left of **How to play**, the same glyph every
+  Shozbot app carries. On a specific day's puzzle — in play or on its results — it
+  shares `https://shozbot.com/fauxcabulary/?daily=YYYY-MM-DD`, so the link opens
+  the same ten tomorrow; on random puzzles and the Past puzzles list it shares the
+  plain address. A phone opens its share sheet; a laptop copies the link and shows
+  "Link copied" for a moment. The address is built from the page's canonical link,
+  never from where the file was loaded.
+- **How to play** opens the rules as a card over the page, the way Acronumbskull's
+  do, rather than a fold-out under the cards.
 - **Random puzzles** are the old game: 10 words at a chosen level with a random
   real/fake split, freshly shuffled, unlimited.
 - Three difficulty levels — Easy, Tricky and Fiendish — each with its own words and
@@ -99,7 +108,7 @@ push to `main`. One-time setup: **Settings → Pages → Build and deployment �
 ## Tests and audits
 
 ```sh
-node tests/run-all.js                         # eight suites, drive the real game logic
+node tests/run-all.js                         # nine suites, drive the real game logic
 node tools/audit.js --dict dict.txt --freq freq.txt   # fairness audit of the word bank
 ```
 
